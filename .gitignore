@@ -1,0 +1,17 @@
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.log
+*.out
+*.vtc
+*.xmpdata
+*.abs
+pdfa.xmpi
+*~
+*.pdf
+slides/*.nav
+slides/*.snm
+slides/*.vrb
+slides/*.toc
+slides/*.pdf

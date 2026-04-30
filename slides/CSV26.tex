@@ -1,0 +1,846 @@
+% Copyright 2026 Fausto Spoto
+%
+% Licensed under the Apache License, Version 2.0 (the "License");
+% you may not use this file except in compliance with the License.
+% You may obtain a copy of the License at
+%
+%    http://www.apache.org/licenses/LICENSE-2.0
+%
+% Unless required by applicable law or agreed to in writing, software
+% distributed under the License is distributed on an "AS IS" BASIS,
+% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+% See the License for the specific language governing permissions and
+% limitations under the License.
+
+%\RequirePackage{luatex85}
+\documentclass[11pt]{beamer}  %% versione proiettore
+%%\documentclass[11pt,handout]{beamer} %% versione stampa
+\usepackage{lucidiJb-2ed}
+
+\usepackage{animate}
+\usepackage{mathtools}
+\usepackage{relsize}
+\usepackage[normalem]{ulem}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{tikz}
+%\usetikzlibrary {arrows.meta,graphs,graphdrawing}
+%\usegdlibrary{layered}
+%\usegdlibrary{trees}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary {arrows.meta}
+\usepackage{algorithm,algpseudocode}
+\usepackage{listings}
+
+\lstdefinelanguage{Takamaka}{
+  keywords=[1]{assert, break, case, catch, class, final, continue, default, do, else, extends, static, false, finally, for, if, implements, import, instanceof, interface, new, private, protected, public, return, super, switch, this, throw, throws, true, try, var, while }, % generic keywords including crypto operations
+  keywordstyle=[1]\color{blue}\bfseries,
+  keywords=[2]{BigInteger, BigIntegerSupport, Contract, PayableContract, Takamaka, StorageList, StorageLinkedList, int, float, double, short, byte, long, boolean, void, String},               % types; money and time units
+  keywordstyle=[2]\color{teal}\bfseries,
+  keywords=[3]{@Payable, @FromContract, caller},
+  keywordstyle=[3]\color{violet}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{ % define general preferences
+  language=Takamaka,
+  %backgroundcolor=\color{verylightgray},
+  extendedchars=true,
+  basicstyle=\footnotesize\ttfamily,
+  showstringspaces=false,
+  showspaces=false,
+  numbers=none,
+  numberstyle=\footnotesize,
+  numbersep=9pt,
+  tabsize=2,
+  breaklines=true,
+  showtabs=false,
+  captionpos=b,
+  escapeinside={||},
+}
+
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+\mode<article>
+{
+  \usepackage{fullpage}
+  \usepackage{hyperref}
+}
+
+\mode<presentation>
+{
+  \setbeamertemplate{background canvas}[vertical shading][bottom=red!10,top=blue!10]
+  \usetheme{Course}
+  \usefonttheme[onlysmall]{structurebold}
+}
+
+\newcommand{\wrt}{\textit{wrt.\ }}
+\newcommand{\ie}{, \textit{ie.}, }
+
+\newcommand{\numberofscoops}{{\#\mathit{scoops}}}
+\newcommand{\noncesize}{{\mathit{nonce}_{\mathit{size}}}}
+\newcommand{\byte}{{\mathit{byte}}}
+\newcommand{\nonce}{{\mathit{nonce}}}
+\newcommand{\execute}{{\mathit{execute}}}
+\newcommand{\bestNonce}{{\mathit{best\_nonce}}}
+\newcommand{\nonces}{{\mathit{nonces}}}
+\newcommand{\scoops}{{\mathit{scoops}}}
+\newcommand{\plot}{{\mathit{plot}}}
+\newcommand{\scoop}{{\mathit{scoop}}}
+\newcommand{\seed}{{\mathit{seed}}}
+\newcommand{\previous}{{\mathit{previous}}}
+\newcommand{\deadline}{{\mathit{deadline}}}
+\newcommand{\generation}{{\mathit{generation}}}
+\newcommand{\size}{{\mathit{size}}}
+\newcommand{\scoopnumber}{{\mathit{scoopNumber}}}
+\newcommand{\data}{{\mathit{data}}}
+\newcommand{\challenge}{{\mathit{challenge}}}
+\newcommand{\delay}{{\mathit{delay}}}
+\newcommand{\mynext}{{\mathit{next}}}
+\newcommand{\nextchallenge}{\challenge_\mynext}
+\newcommand{\initialchallenge}{{\mathit{initialChallenge}}}
+\newcommand{\finalstateid}{{\mathit{finalStateId}}}
+\newcommand{\height}{{\mathit{height}}}
+\newcommand{\trunk}{{\mathit{trunk}}}
+\renewcommand{\block}{{\mathit{block}}}
+\newcommand{\oblivion}{{\mathit{oblivion}}}
+\newcommand{\now}{{\mathit{now}}}
+\newcommand{\beat}{{\mathit{beat}}}
+\newcommand{\weightedbeat}{\mathit{weightedBeat}}
+\newcommand{\nextweightedbeat}{\weightedbeat_\mynext}
+\newcommand{\power}{{\mathit{power}}}
+\newcommand{\hash}{{\mathit{hash}}}
+\newcommand{\difficulty}{{\mathit{difficulty}}}
+\newcommand{\hashfirstk}{{\mathit{hash\ of\ first\ \kappa\ bytes\ of}}}
+\newcommand{\previousblockhash}{{\mathit{previousBlockHash}}}
+\newcommand{\waitingtime}{{\mathit{waitingTime}}}
+\newcommand{\transactions}{{\mathit{transactions}}}
+\newcommand{\nextwaitingtime}{\tau_\mynext}
+\newcommand{\nextpower}{\power_\mynext}
+\newcommand{\nextacceleration}{\alpha_\mynext}
+\newcommand{\nextblock}{\block_\mynext}
+\newcommand{\genesis}{{\mathit{genesis}}}
+\newcommand{\consensus}{{\mathit{consensus}}}
+\newcommand{\nattobe}{{\mathit{nat2be}}}
+\newcommand{\betonat}{{\mathit{be2nat}}}
+\newcommand{\finalhash}{{h_{\mathit{final}}}}
+\newcommand{\chainidentifier}{{\mathit{chainIdentifier}}}
+\newcommand{\publickeyofpeer}{{\mathit{publicKeyOfPeer}}}
+\newcommand{\publickeyofminer}{{\mathit{publicKeyOfMiner}}}
+
+\newcommand{\Prologs}{{\mathsf{Prologs}}}
+\newcommand{\Plots}{{\mathsf{Plots}}}
+\newcommand{\Challenges}{{\mathsf{Challenges}}}
+\newcommand{\Scoops}{{\mathsf{Scoops}}}
+\newcommand{\Nonces}{{\mathsf{Nonces}}}
+\newcommand{\Trunks}{{\mathsf{Trunks}}}
+\newcommand{\Blocks}{{\mathsf{Blocks}}}
+\newcommand{\GenesisBlocks}{{\mathsf{GenesisBlocks}}}
+\newcommand{\NonGenesisBlocks}{{\mathsf{NonGenesisBlocks}}}
+\newcommand{\Deadlines}{{\mathsf{Deadlines}}}
+
+\newcommand{\computer}{\includegraphics[width=1.3cm]{pictures/computer}}
+\newcommand{\leftArrow}{\includegraphics[width=0.6cm]{pictures/left_arrow}}
+\newcommand{\signature}{\includegraphics[width=0.3cm]{pictures/signature}}
+\newcommand{\leftplug}{\includegraphics[width=0.7cm]{pictures/plug_left}}
+\newcommand{\rightplug}{\includegraphics[width=0.7cm]{pictures/plug_right}}
+\newcommand{\ssd}{\includegraphics[width=0.8cm]{pictures/ssd}}
+
+\colorlet{alicecolor}{green!90!black}
+\colorlet{bobcolor}{red!90!black}
+\colorlet{faustocolor}{yellow!90!black}
+\colorlet{lightred}{red!50!white}
+\colorlet{verylightgray}{gray!25!white}
+      
+\subtitle{Challenges of Software Verification Symposium 2026, Venice, Italy}
+\title{Testing Smart Contracts against an Abstract Blockchain Interface}
+\institute{Universit\`a di Verona, Italy}
+\date{June 4-5, 2026}
+
+\setbeamercovered{invisible}
+
+\def\codesize{\smaller}
+\def\<#1>{\codeid{#1}}
+\newcommand{\codeid}[1]{\ifmmode{\mbox{\codesize\ttfamily{#1}}}\else{\codesize\ttfamily #1}\fi}
+
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Verification of smart contracts}
+  \begin{itemize}
+  \item the importance of software verification is obvious for our community
+  \item smart contracts deal with money: still more relevant
+  \item many tools are based on static analysis
+    (Slither, Mythril, Solhint, Securify, Rattle, LiSA, \ldots)
+  \end{itemize}
+
+  \begin{center}
+    \textbf{So why testing?}
+  \end{center}
+
+  Testing has limits but also its own advantages:
+
+  \begin{itemize}
+  \item stable results, independent from the version of the testing framework
+  \item (hopefully) quick results
+  \item focus on more relevant cornercases
+  \item focus on the intention of the programmer, not on abstract correctness
+  \item mature testing frameworks
+  \item simple integration with IDEs and continuous integration suites
+  \end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Origin of this work}
+  This work originated during the development of the Hotmoka layer for the execution of
+  smart contracts in Java:
+
+  \begin{center}
+    {\color{red} Olivieri, Spoto and Tagliaferro:
+    \emph{An application layer with protocol-based Java smart contract verification},
+    Frontiers in Computer Science, 7, 2025}
+  \end{center}
+
+  \begin{itemize}
+  \item Hotmoka applies static analysis at the protocol-level: a filter to reject
+  inconsistent smart contracts
+
+  \item Hotmoka allows testing during development: a check of the
+  smart contracts against the intention of the programmer
+  \end{itemize}
+
+\end{frame}
+
+\colorlet{lightred}{red!50!white}
+\colorlet{verylightred}{red!20!white}
+\colorlet{verylightyellow}{yellow!20!white}
+\colorlet{verylightviolet}{violet!20!white}
+\colorlet{verylightgreen}{green!20!white}
+\colorlet{verylightgray}{gray!20!white}
+\newcommand{\db}{\includegraphics[width=1.3cm]{pictures/db}}
+
+\begin{frame}\frametitle{Hotmoka is a blockchain if run over a consensus engine}
+
+ \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (-0.5,-0.7) rectangle +(4,2.2);
+      \draw (1.5,1.1) node {blockchain engine};
+      \draw (1.5,0.7) node {{\small (networking \& consensus)}};
+      \draw[-, thick] (1.5,-0.7) -- (1.5,-2);
+      \draw (1.5,-2) node[scale=0.7] {\db};
+      \draw (1.5,-2.9) node {database of blocks};
+      \draw[<->, thick] (3.5,0) -- (5.5,0);
+      \draw (6.5,0) node {other peers};
+      \draw (4.5,0.3) node {{\scriptsize gossiping}};
+
+      \draw [fill=verylightyellow,thick] (0.5,-0.25) rectangle +(2,0.5);
+      \draw (1.5,0) node {mempool};
+      \draw[->, thick] (4.2,3.4) -- (2.5,3.4);
+      \draw (5,3.4) node {requests};
+
+      \draw [fill=verylightgreen,thick] (0.5,3) rectangle +(2,0.8);
+      \draw (1.5,3.4) node {Hotmoka};
+      \draw[-, thick] (0.5,3.4) -- (-1,3.4);
+      \draw (-1,3.4) node[scale=0.7] {\db};
+      \draw (-1,2.5) node {database of states};
+
+      \draw[->, thick] (1.1,1.5) -- (1.1,3);
+      \draw[->, thick] (1.9,3) -- (1.9,1.5);
+      \draw (1.5,2.25) node {{\small API}};
+    \end{tikzpicture}
+  \end{center}
+  
+\end{frame}
+
+\begin{frame}\frametitle{Hotmoka + Tendermint: a proof of stake blockchain}
+
+ \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (-0.5,-0.7) rectangle +(4,2.2);
+      \draw (1.5,1.1) node {\textbf{Tendermint}};
+      \draw (1.5,0.7) node {{\small (networking \& consensus)}};
+      \draw[-, thick] (1.5,-0.7) -- (1.5,-2);
+      \draw (1.5,-2) node[scale=0.7] {\db};
+      \draw (1.5,-2.9) node {database of blocks};
+      \draw[<->, thick] (3.5,0) -- (5.5,0);
+      \draw (6.5,0) node {other peers};
+      \draw (4.5,0.3) node {{\scriptsize gossiping}};
+
+      \draw [fill=verylightyellow,thick] (0.5,-0.25) rectangle +(2,0.5);
+      \draw (1.5,0) node {mempool};
+      \draw[->, thick] (4.2,3.4) -- (2.5,3.4);
+      \draw (5,3.4) node {requests};
+
+      \draw [fill=verylightgreen,thick] (0.5,3) rectangle +(2,0.8);
+      \draw (1.5,3.4) node {Hotmoka};
+      \draw[-, thick] (0.5,3.4) -- (-1,3.4);
+      \draw (-1,3.4) node[scale=0.7] {\db};
+      \draw (-1,2.5) node {database of states};
+
+      \draw[->, thick] (1.1,1.5) -- (1.1,3);
+      \draw[->, thick] (1.9,3) -- (1.9,1.5);
+      \draw (1.5,2.25) node {{\small API}};
+    \end{tikzpicture}
+  \end{center}
+  
+\end{frame}
+
+\begin{frame}\frametitle{Hotmoka + Mokamint: a proof of space blockchain}
+
+ \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (-0.5,-0.7) rectangle +(4,2.2);
+      \draw (1.5,1.1) node {\textbf{Mokamint}};
+      \draw (1.5,0.7) node {{\small (networking \& consensus)}};
+      \draw[-, thick] (1.5,-0.7) -- (1.5,-2);
+      \draw (1.5,-2) node[scale=0.7] {\db};
+      \draw (1.5,-2.9) node {database of blocks};
+      \draw[<->, thick] (3.5,0) -- (5.5,0);
+      \draw (6.5,0) node {other peers};
+      \draw (4.5,0.3) node {{\scriptsize gossiping}};
+
+      \draw [fill=verylightyellow,thick] (0.5,-0.25) rectangle +(2,0.5);
+      \draw (1.5,0) node {mempool};
+      \draw[->, thick] (4.2,3.4) -- (2.5,3.4);
+      \draw (5,3.4) node {requests};
+
+      \draw [fill=verylightgreen,thick] (0.5,3) rectangle +(2,0.8);
+      \draw (1.5,3.4) node {Hotmoka};
+      \draw[-, thick] (0.5,3.4) -- (-1,3.4);
+      \draw (-1,3.4) node[scale=0.7] {\db};
+      \draw (-1,2.5) node {database of states};
+
+      \draw[->, thick] (1.1,1.5) -- (1.1,3);
+      \draw[->, thick] (1.9,3) -- (1.9,1.5);
+      \draw (1.5,2.25) node {{\small API}};
+    \end{tikzpicture}
+  \end{center}
+  
+\end{frame}
+
+\begin{frame}\frametitle{Hotmoka + Disk: a moked blockchain}
+
+ \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (-0.5,-0.7) rectangle +(4,2.2);
+      \draw (1.5,1.1) node {\textbf{Disk}};
+      \draw[-, thick] (1.5,-0.7) -- (1.5,-2);
+      \draw (1.5,-2) node[scale=0.7] {\db};
+      \draw (1.5,-2.9) node {database of blocks};
+      \phantom{\draw[<->, thick] (3.5,0) -- (5.5,0);}
+      \phantom{\draw (6.5,0) node {other peers};}
+      \phantom{\draw (4.5,0.3) node {{\scriptsize gossiping}};}
+
+      \draw [fill=verylightyellow,thick] (0.5,-0.25) rectangle +(2,0.5);
+      \draw (1.5,0) node {mempool};
+      \draw[->, thick] (4.2,3.4) -- (2.5,3.4);
+      \draw (5,3.4) node {requests};
+      
+      \draw [fill=verylightgreen,thick] (0.5,3) rectangle +(2,0.8);
+      \draw (1.5,3.4) node {Hotmoka};
+      \draw[-, thick] (0.5,3.4) -- (-1,3.4);
+      \draw (-1,3.4) node[scale=0.7] {\db};
+      \draw (-1,2.5) node {database of states};
+
+      \draw[->, thick] (1.1,1.5) -- (1.1,3);
+      \draw[->, thick] (1.9,3) -- (1.9,1.5);
+      \draw (1.5,2.25) node {{\small API}};
+    \end{tikzpicture}
+  \end{center}
+  
+\end{frame}
+
+\begin{frame}\frametitle{We want to test smart contracts against\ldots}
+
+  \begin{center}
+    {\color{red}\ldots a single Hotmoka + Tendermint local node}
+  \end{center}
+
+  \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (0,0.2) rectangle +(2,1.6);      
+      \draw (1,1.5) node {Hotmoka};
+      \draw (1,1) node {+};
+      \draw (1,0.5) node {Tendermint};
+
+      \draw[->, thick] (-2,1) -- (0,1);
+      \draw (-2.8,1) node {requests};
+      
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+  \item one can see this as unit testing of the smart contracts
+  \item but also as functional testing of Hotmoka and Tendermint
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}\frametitle{We want to test smart contracts against\ldots}
+
+  \begin{center}
+    {\color{red}\ldots a single Hotmoka + Mokamint local node}
+  \end{center}
+
+  \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (0,0.2) rectangle +(2,1.6);      
+      \draw (1,1.5) node {Hotmoka};
+      \draw (1,1) node {+};
+      \draw (1,0.5) node {Mokamint};
+
+      \draw[->, thick] (-2,1) -- (0,1);
+      \draw (-2.8,1) node {requests};
+      
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+  \item one can see this as unit testing of the smart contracts
+  \item but also as functional testing of Hotmoka and Mokamint
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}\frametitle{We want to test smart contracts against\ldots}
+
+  \begin{center}
+    {\color{red}\ldots a single Hotmoka + Disk local node}
+  \end{center}
+
+  \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (0,0.2) rectangle +(2,1.6);      
+      \draw (1,1.5) node {Hotmoka};
+      \draw (1,1) node {+};
+      \draw (1,0.5) node {Disk};
+
+      \draw[->, thick] (-2,1) -- (0,1);
+      \draw (-2.8,1) node {requests};
+      
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+  \item one can see this as unit testing of the smart contracts
+  \item but also as functional testing of Hotmoka
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}\frametitle{We want to test smart contracts against\ldots}
+
+  \begin{center}
+    {\color{red}\ldots a network of $n$ Hotmoka + Tendermint local nodes}
+  \end{center}
+
+  \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (0,0.2) rectangle +(2,1.6);      
+      \draw (1,1.5) node {Hotmoka};
+      \draw (1,1) node {+};
+      \draw (1,0.5) node {Tendermint};
+
+      \draw[->, thick] (-2,1) -- (0,1);
+      \draw (-2.8,1) node {requests};
+
+      \draw [fill=verylightviolet,thick] (-3,-1.8) rectangle +(2,1.6);      
+      \draw (-2,-0.5) node {Hotmoka};
+      \draw (-2,-1) node {+};
+      \draw (-2,-1.5) node {Tendermint};
+
+      \draw [fill=verylightviolet,thick] (3,-1.8) rectangle +(2,1.6);      
+      \draw (4,-0.5) node {Hotmoka};
+      \draw (4,-1) node {+};
+      \draw (4,-1.5) node {Tendermint};
+
+      \draw[-, dashed] (-1,-1) -- (3,-1);
+      \draw[-, dashed] (-1,-1) -- (1,0.2);
+      \draw[-, dashed] (3,-1) -- (1,0.2);
+
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+  \item one can see this as unit testing of the smart contracts
+  \item but also as a more realistic functional testing of Hotmoka and Tendermint
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}\frametitle{We want to test smart contracts against\ldots}
+
+  \begin{center}
+    {\color{red}\ldots a network of $n$ Hotmoka + Mokamint local nodes}
+  \end{center}
+
+  \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (0,0.2) rectangle +(2,1.6);      
+      \draw (1,1.5) node {Hotmoka};
+      \draw (1,1) node {+};
+      \draw (1,0.5) node {Mokamint};
+
+      \draw[->, thick] (-2,1) -- (0,1);
+      \draw (-2.8,1) node {requests};
+
+      \draw [fill=verylightviolet,thick] (-3,-1.8) rectangle +(2,1.6);      
+      \draw (-2,-0.5) node {Hotmoka};
+      \draw (-2,-1) node {+};
+      \draw (-2,-1.5) node {Tendermint};
+
+      \draw [fill=verylightviolet,thick] (3,-1.8) rectangle +(2,1.6);      
+      \draw (4,-0.5) node {Hotmoka};
+      \draw (4,-1) node {+};
+      \draw (4,-1.5) node {Mokamint};
+
+      \draw[-, dashed] (-1,-1) -- (3,-1);
+      \draw[-, dashed] (-1,-1) -- (1,0.2);
+      \draw[-, dashed] (3,-1) -- (1,0.2);
+
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+  \item one can see this as unit testing of the smart contracts
+  \item but also as a more realistic functional testing of Hotmoka and Mokamint
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}\frametitle{Adding a second dimension to the tests}
+
+  \begin{center}
+    Each test can be run against a remote node/network as well
+    (connected through the internet, possibly running on a different machine)
+  \end{center}
+
+  \begin{center}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (0,0.2) rectangle +(2,1.6);      
+      \draw (1,1.5) node {Hotmoka};
+      \draw (1,1) node {+};
+      \draw (1,0.5) node {\ldots};
+
+      \draw[->, dashed] (-2,1) -- (0,1);
+      \draw (-1,1.3) node {{\scriptsize internet}};
+      \draw (-2.8,1) node {requests};
+      
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+  \item one can see this as unit testing of the smart contracts
+  \item but also as a still more realistic functional testing of Hotmoka and
+    the engine (Tendermint/Mokamint), taking into account
+    the networking layer for marshalling/unmarshalling and transferring requests
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{A smart contract for a Ponzi scheme}
+
+  \begin{lstlisting}[language=Takamaka]
+public class Ponzi extends Contract {
+ private final StorageList<PayableContract> investors = new StorageLinkedList<>();
+
+ public @FromContract(PayableContract.class) Ponzi() {
+  investors.add((PayableContract) caller());
+ }
+
+ public @Payable @FromContract(PayableContract.class) void invest(long amount) {
+  require(amount >= 1000, "you must invest at least 1000");
+  var split = amount / investors.size();
+  investors.forEach(investor -> investor.receive(split));
+  investors.add((PayableContract) caller());
+ }
+}
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{A JUnit test class for the Ponzi scheme contract 1/3}
+
+  \begin{lstlisting}[language=Java]
+class Ponzi extends HotmokaTest {
+ var PONZI = classNamed("io.hotmoka.examples.ponzi.Ponzi");
+ var PONZI_CONSTRUCTOR = ConstructorSignatures.of(PONZI);
+ var INVEST = MethodSignatures.of(PONZI, "invest", LONG);
+ var GAS_PRICE = 1;
+ var GAS_LIMIT = 10_000_000;
+
+ @BeforeAll
+ static void beforeAll() {
+  // a macro: send to Hotmoka a request to install a jar
+  setJar("ponzi.jar");
+ }
+
+ @BeforeEach
+ void beforeEach() {
+  // a macro: send to Hotmoka requests to create 3 accounts
+  setAccounts(1_000_000_000, 1_000_000_000, 1_000_000_000);
+ }
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{A JUnit test class for the Ponzi scheme contract 2/3}
+
+  \begin{lstlisting}[language=Java]
+ @Test void investmentSplitsCorrectly() {
+  // send to Hotmoka a request to let account(0) create
+  // the contract and become the first investor
+  var contract = callConstructor(privateKey(0), account(0), GAS_LIMIT, GAS_PRICE, jar(), PONZI_CONSTRUCTOR);
+  // take note of the balance of account(0) now
+  var initial = getBalanceOf(account(0));
+  // account(1) invests in the contract
+  var first = 10_000_000;
+  callMethod(privateKey(1), account(1), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, first);
+  // the first investment went to account(0)
+  assertEquals(initial + first, getBalanceOf(account(0)));
+  // account(2) invests in the contract
+  var second = 2_000_000;
+  callMethod(privateKey(2), account(2), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, second);
+  // half of the second investment went to account(0)
+  assertEquals(initial + first + second/2, getBalanceOf(account(0)));
+ }
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{A JUnit test class for the Ponzi scheme contract 3/3}
+
+  \begin{lstlisting}[language=Java]
+ @Test void tooSmallInvestmentThrowsException() {
+  // send to Hotmoka a request to let account(0) create
+  // the contract and become the first investor
+  var contract = callConstructor(privateKey(0), account(0), GAS_LIMIT, GAS_PRICE, jar(), PONZI_CONSTRUCTOR);
+
+  // account(1) invests too little in the contract
+  var first = 100;
+  throwsTransactionExceptionWithCauseAndMessage
+   ("io.takamaka.code.lang.RequirementViolationException",
+    "you must invest at least 1000",
+    () -> callMethod(privateKey(1), account(1), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, first)
+   );
+ }
+}
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}\frametitle{The API of a Hotmoka node}
+
+  JUnit tests of Hotmoka smart contracts work against the abstract interface of a node,
+  consisting of requests to:
+
+  \begin{itemize}
+  \item install a jar (paid)
+  \item create an object (paid)
+  \item call a method of an object or of a class (paid)
+  \item run a side-effect-free method of an object or of a class (free)
+  \end{itemize}
+
+  \medskip
+
+  Requests can receive parameters and yield a result:
+  \begin{itemize}
+  \item primitive values (\texttt{int}, \texttt{float}, \texttt{boolean}, \ldots)
+  \item machine-independent references (addresses inside the database of states)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Different implementations of the same node API interface}
+
+  The test suite's fixture instantiates a test \<node> to run all tests against:
+
+  \begin{itemize}
+  \item a single proof of stake local node: \<node = new TendermintNode(config)>
+  \item a single proof of space local node: \<node = new MokamintNode(config)>
+  \item a single moked blockchain node: \<node = new DiskNode(config)>
+  \item a network of $n$ proof of stake nodes: \<new TendermintNode(config$_1$)>,\ldots,
+    \<new TendermintNode(config$_{n-1}$)>, \<node = new TendermintNode(config$_n$)>
+  \item a network of $n$ proof of space nodes: \<new MokamintNode(config$_1$)>,\ldots,
+    \<new MokamintNode(config$_{n-1}$)>, \<node = new MokamintNode(config$_n$)>
+  \end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{The same node API interface also for remote nodes}
+
+  Just use the {\color{red}adaptor design pattern}:
+
+  \begin{itemize}
+  \item a remote network of $n$ proof of space nodes:
+    \begin{itemize}
+    \item {\color{blue}in the remote machine}:
+      \<new MokamintNode(config$_1$)>,\ldots,
+      \<new MokamintNode(config$_{n-1}$)>, \<temp = new MokamintNode(config$_n$)>
+      then adapt the local node \<temp> to a web service of its API listening at port 8001:
+      \[
+      \<new NodeService(temp, 8001)>
+      \]
+    \item {\color{blue}in the local (testing) machine}, adapt back the web service to a node:
+      \[
+      \<node = new RemoteNode("ws://remote-machine.com:8001")>
+      \]
+      or
+      \[
+      \<node = new RemoteNode("ws://localhost:8001")>
+      \]
+      if remote and local machine coincide.
+    \end{itemize}
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}\frametitle{Run all tests against a single proof of stake node, creating a block every 4000 milliseconds}
+
+  \begin{center}
+    The source code of Hotmoka comes with a test suite developed during the years for continuous
+    integration and non-regression
+  \end{center}
+
+  \medskip
+
+  \begin{center}
+    {\color{red}\<mvn test -DnodeType=tendermint -DnumberOfNodes=1 -DtargetBlockCreationTime=4000>}
+  \end{center}
+
+  \begin{center}
+    {\color{blue}\<Successes: 422, Failures: 0, Time: 3h03m55s>}\\
+    Good for nightly continuous integration but not during development
+  \end{center}
+
+\end{frame}
+
+\begin{frame}\frametitle{Run all tests against a network of four proof of stake nodes, creating a block every 3000 milliseconds}
+
+  \begin{center}
+    {\color{red}\<mvn test -DnodeType=tendermint -DnumberOfNodes=4 -DtargetBlockCreationTime=3000>}
+  \end{center}
+
+  \begin{center}
+    {\color{blue}\<Successes: 422, Failures: 0, Time: 2h35m11s>}\\
+    Good for nightly continuous integration but not during development
+  \end{center}
+
+\end{frame}
+
+\begin{frame}\frametitle{Run all tests against a single proof of space node, creating a block every 4000 milliseconds}
+
+  \begin{center}
+    {\color{red}\<mvn test -DnodeType=mokamint -DnumberOfNodes=1 -DtargetBlockCreationTime=4000>}
+  \end{center}
+
+  \begin{center}
+    {\color{blue}\<Successes: 422, Failures: 0, Time: 3h05m01s>}\\
+    Good for nightly continuous integration but not during development
+  \end{center}
+
+\end{frame}
+
+\begin{frame}\frametitle{Run all tests against a blockchain moked node}
+
+  Block creation rate and number of nodes is not used for this kind of node:
+
+  \begin{center}
+    {\color{red}\<mvn -DnodeType=disk>}
+  \end{center}
+
+  \begin{center}
+    {\color{blue}\<Successes: 422, Failures: 0, Time: 2m42s>}\\
+    Good for frequent continuous integration!
+  \end{center}
+\end{frame}
+
+\begin{frame}\frametitle{Run all tests against a remote blockchain moked node}
+
+  Block creation rate and number of nodes is not used for this kind of node:
+
+  \begin{center}
+    {\color{red}\<mvn -DnodeType=disk-remote>}
+  \end{center}
+
+  \begin{center}
+    {\color{blue}\<Successes: 422, Failures: 0, Time: 3m21s>}\\
+    Good for frequent continuous integration!
+  \end{center}
+
+  \begin{center}
+    {\color{red}This is the configuration run at every \<git push>
+    through a GitHub action}
+  \end{center}
+
+\end{frame}
+
+\begin{frame}\frametitle{Run all tests against a network of four proof of space nodes, creating a block every 3000 milliseconds}
+
+  \begin{center}
+    {\color{red}\<mvn test -DnodeType=mokamint -DnumberOfNodes=4 -DtargetBlockCreationTime=3000>}
+  \end{center}
+
+  \begin{center}
+    {\color{blue}$\Rightarrow$\<Successes: 355, Failures: 67, Time: 3h16m06s>$\Leftarrow$}\\
+    Tests fail randomly, because Mokamint has probabilistic finality and history might change with more than one node
+  \end{center}
+
+\end{frame}
+
+\begin{frame}\frametitle{Conclusion}
+  \begin{itemize}
+  \item tests are written only once but can be run against different instantiations
+    of the same node API interface
+    \begin{itemize}
+    \item good for testing different consensus engines
+    \end{itemize}
+  \item testing against real consensus engines is too slow for
+    frequent continuos integration or as non-regression test 
+  \item a moked blockchain node that still implements a database allows one to test smart contracts
+    and the Hotmoka execution layer in a few minutes
+    \begin{itemize}
+    \item good for frequent continuos integration and as non-regression test 
+    \end{itemize}
+  \item adapting web services to the node interface allows one to test against a node
+    on a remote machine and to test the blockchain networking layer as well
+  \item limit: consensus engines with probabilistic finality make testing hard with more than one node
+    because of history changes
+  \item limit: we cannot write tests depending on timings since they depend on the block creation rate
+  \end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{References}
+
+  \begin{itemize}
+  \item the Hotmoka project: \url{www.hotmoka.io}
+  \item its source code: \url{https://github.com/Hotmoka/hotmoka}
+  \item Tendermint: \url{https://tendermint.com/}
+  \item Mokamint: \url{https://github.com/Mokamint-chain/mokamint}
+  \end{itemize}
+
+\end{frame}
+
+\end{document}
