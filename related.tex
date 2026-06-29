@@ -1,1 +1,59 @@
 \section{Related Work}\label{sec:related}
+
+Most testing frameworks work for Solidity smart contracts
+for Ethereum-like blockchains, that still cover a majority of the
+running smart contracts.
+Pytest~\citep{pytest} is a Python test suite for Ethereum smart contracts.
+Foundry~\citep{foundry} is a Rust framework
+that includes a testing suite
+where Solidity contracts create the fixture and runs the tests.
+Remix includes a similar test suite in Solidity~\citep{remixunittesting},
+integrated inside the development environment.
+Both Waffle~\citep{waffle} and Hardhat~\citep{hardhat} are TypeScript
+testing frameworks for Solidity smart contracts:
+they use the Web3 API tor install the contracts in blockchain
+and interact with them.
+The legacy Truffle framework~\citep{truffle} is now discontinued
+and converging into Hardhat.
+They are probably the most similar approach to our use of JUnit,
+despite the different programming language.
+The Ape framework is a Web3 development tool for different smart contract
+languages, including Solidity. It has its own testing
+framework~\citep{apetesting}, based on pytest.
+Wake~\citep{wake} is a development and testing framework based on pytest,
+that includes some fuzzing feature.
+
+Other blockchains, with different smart contract languages, have their own
+testing frameworks. We cannot cite them all here.
+Just for providing a few examples, there are testing frameworks
+for Solana~\citep{rapidinnovation}, Polkadot~\citep{zombienet},
+and Algorand~\citep{algokit}.
+
+Writing test cases for smart contracts is considered fifficult
+since synamic sequences of behaviors are tested, rather than
+specific outputs. Therefore, the \emph{test oracle problem} plays
+a significant role here and it is why metamorphic testing
+(that tests consistency in the output rather than the exact output)
+is widely used for testing smart contracts~\citep{SunJZL25,VillanuevaSR25}.
+Moreover, test cases for smart contracts can
+sometime be generated automatically,
+for instance for specific properties such as gas consumption
+bounds~\citep{AlbertDDFG26} or with the support of large language models
+and retrieval augmented generation~\citep{SbouiL26}.
+Fuzzing has also been used to generate or strengthen test cases for
+smart contracts~\cite{LahamiKMMR24,WongZNLCYLLW24}.
+
+Test cases can be tested themselves, in order to evaluate their
+efficacy and adequacy. This is typically achieved through
+mutation-based techniques~\citep{ChenZZZW24,BanescuB0PZ24,Barboni0PBZ24}.
+
+Finally, a systematic review on smart contract testing is reported
+in~\citep{ImperiusA22}.
+
+This article builds on the JUnit testing framework~\citep{junit},
+which is the de facto standard for Java. Namely, we test smart contracts
+written in a subset of Java called Takamaka~\citep{Spoto19} and
+executed over the public blockchain Hotmoka~\citep{hotmoka}. The latter
+is normally based on the proof of space consensus engine Mokamint,
+but can also run over the Tendermint engine~\citep{Kwon14},
+leading to a proof of stake version of Hotmoka.
