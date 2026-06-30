@@ -1,5 +1,21 @@
 \section{Introduction}\label{sec:introduction}
 
+Smart contracts are software components that
+run inside a blockchain. Their execution
+modifies the state of the application implemented by the blockchain.
+For instance, Ethereum smart contracts are typically written in
+Solidity, can be installed in the state of the application and their
+execution modifies a key/value store, used to represent accounts, balances
+and actual data objects~\citep{AntonopoulosWPMP25}. Smart contracts
+deal with money, notarization and agreements. They are immutable after
+deployment. Therefore, their correctness is important and there exist
+many techniques to increase confidence on their correctness.
+The simpler and most traditional one is testing, which consists
+in creating some executable usage scenarios for the smart contracts,
+as a sequence of transactions starting from an initial fixture.
+Testcases test the final state of the application to verify the correct
+behavior of the smart contracts.
+
 \begin{figure*}[t]
   \begin{center}
     \begin{tikzpicture}
@@ -38,12 +54,104 @@
       \draw[<-, thick] (3.5,0.5) -- (6,0.5);
       \draw (4.75,0.25) node {{\small answers}};
 
-      \draw[->, thick] (1.2,1.5) -- (1.2,3);
-      \draw[->, thick] (1.8,3) -- (1.8,1.5);
+      \draw[<-, thick] (1.2,1.5) -- (1.2,3);
+      \draw[<-, thick] (1.8,3) -- (1.8,1.5);
     \end{tikzpicture}
   \end{center}
-  \caption{The architecture of a generic blockchain peer,
-    such as Tendermint or Mokamint. It is a more detailed view of Fig.~\ref{fig:mining}.
+  \caption{The architecture of a blockchain peer.
     Peer, miner(s) and application are separate software
-    components, possibly running in distinct machines connected through a network.}\label{fig:genericity}
+    components, possibly running in distinct machines connected
+    through a network. Client(s) are external
+    software tools that connect to the peer through an API
+    and run transactions to install smart contracts
+    and run their methods.}\label{fig:architecture}
 \end{figure*}
+
+\Cref{fig:architecture} shows an abstract view of the architecture of
+a typical blockchain peer. The peer deals with networking and consensus.
+It communicates with one or more miners, that help the peer create new blocks,
+stored in its database of blocks. Miners receive a challenge to solve
+(for instance, the maximization of the hash of a new block) and provide
+their best solution for the challenge. Peers are connected to other peers
+and gossip new blocks and new transaction requests to them.
+Clients are software
+components, external to the peer, that consume the API of the peer.
+For instance, they can be wallets that require the execution of money
+transfer transactions. Or they can be DApps that require the execution
+of transactions to install and interact with smart contracts in blockchain.
+Finally, the application is a software component that specifies which
+transactions are valid and which is their semantics. For instance, the Bitcoin
+application has only transactions that transform input UTXOs into ouptut
+UTXOs, while the Ethereum application has transactions that can execute
+arbitrary EVM bytecode. Transaction requests are first parked inside a
+mempool, a queue from where they are eventually extracted for execution.
+Clients may receive responses about the outcome of the
+transactions that they requested,
+in the form of actual results or events. There is an actual API
+that specifies the request/response
+programming interface for the blockchain, such as the Web3 API,
+in the case of Ethereum.
+
+Testcases can be seen as clients that use the blockchain API to simulate
+usage scenarios for smart contracts and verify their outcome.
+In terms of \Cref{fig:architecture}, this means that testcases assume
+the blockchain peer, its miners and its application to be working correctly
+and use them as a testbench for the execution of the smart contracts, that
+are the target of the testing activity. But another perspective is possible:
+testcases can be assumed to pass and can get used as non-regression tests
+for modifications to the blockchain peer, miners or application, or for
+complete rewritings of the peer. The target of the testing activity are
+peer, miners and application in this case.
+
+This article uses testcases in poth ways.
+It originated during the development of Hotmoka~\citep{hotmoka},
+a new, permissionless, public blockchain based on Solidity-like
+smart contracts written in a subset of Java called Takamaka~\citep{Spoto19}.
+Testcases have been used to give confidence in the Takamaka
+smart contracts, but also to support the development of the Hotmoka peer,
+in order to guarantee that the latter executed the smart contracts
+as expected. Moreover, the Hotmoka peer transitioned from an initial
+version based on proof of stake over Tendermint~\citep{Kwon14} to its
+current version based on proof of space over Mokamint~\citep{mokamint}.
+Testcases on smart contracts have been invaluable during this transition,
+to give confidence in the correctness of the new peer, despite its
+radical shift of consensus algorithm.
+
+This has been possible because the abstract API between clients and peer
+is the same, regardless of the implementation of the peer and of its consensus
+algorithm. The existence of this abstract interface has also allowed us
+to apply the traditional mocking approach to it: the peer
+in \cref{fig:architecture} has been replaced with a mocked peer that does
+not implement consensus nor gossiping, but just executes the transaction
+requests with an actual application. The advantage is that
+testcases can be executed must faster (minutes) than against an actual peer
+of an actual blockchain (hours),
+that must abide to consensus and create blocks slowly, at regular intervals.
+The limit is that mocking only allows one to test the application
+(\cref{fig:architecture}), since the other components are mocked.
+Nevertheless, this approach has been very useful to reduce the time
+for the development of the Hotmoka application and currently runs during its
+continuous integration as a Github action.
+
+The contributions of this article are the following:
+%
+\begin{itemize}
+\item the description of the abstract API between the clients and an
+  Hotmoka blockchain peer;
+\item the description of how that API allows one to
+  run testcases of smart contracts
+  against different implementations of the peer, with different
+  consensus algorithms;
+\item the mocking strategy of the peer, that makes the execution of the
+  testcases faster and allows their use for continuous integration.
+\end{itemize}
+
+The rest of this article is organized as follows. \Cref{sec:related} reports
+related works. \Cref{sec:takamaka} presents an example of smart contract
+in the Takamaka subset of Java used by Hotmoka and of a testcase for that
+smart contract. \Cref{sec:interface} presents the API between clients
+and Hotmoka peers. \Cref{sec:mocking} describes the implementation
+of a mocked Hotmoka peer, that still uses an actual application to run
+smart contract transactions. \Cref{sec:experiments} reports experiments with
+the testing of Takamaka smart contracts against different implementations
+of the API, including the mocked one. \Cref{sec:conclusion} concludes.
