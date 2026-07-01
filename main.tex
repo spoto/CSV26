@@ -287,6 +287,74 @@
 
 \newcommand{\db}{\includegraphics[width=1.3cm]{pictures/db}}
 
+\lstdefinelanguage{Takamaka}{
+  keywords=[1]{assert, break, case, catch, class, final, continue, default, do, else, extends, static, false, finally, for, if, implements, import, instanceof, interface, new, private, protected, public, return, super, switch, this, throw, throws, true, try, var, while }, % generic keywords including crypto operations
+  keywordstyle=[1]\color{blue}\bfseries,
+  keywords=[2]{BigInteger, BigIntegerSupport, Contract, PayableContract, Takamaka, StorageList, StorageLinkedList, int, float, double, short, byte, long, boolean, void, String},               % types; money and time units
+  keywordstyle=[2]\color{teal}\bfseries,
+  keywords=[3]{@Payable, @FromContract, caller},
+  keywordstyle=[3]\color{violet}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{ % define general preferences
+  language=Takamaka,
+  %backgroundcolor=\color{verylightgray},
+  extendedchars=true,
+  basicstyle=\footnotesize\ttfamily,
+  showstringspaces=false,
+  showspaces=false,
+  numbers=none,
+  numberstyle=\footnotesize,
+  numbersep=9pt,
+  tabsize=2,
+  breaklines=true,
+  showtabs=false,
+  captionpos=b,
+  escapeinside={||},
+}
+
+\lstdefinelanguage{Java}{
+  keywords=[1]{assert, break, case, catch, class, final, continue, default, do, else, extends, static, false, finally, for, if, implements, import, instanceof, interface, new, private, protected, public, return, super, switch, this, throw, throws, true, try, var, while }, % generic keywords including crypto operations
+  keywordstyle=[1]\color{blue}\bfseries,
+  keywords=[2]{BigInteger, int, float, double, short, byte, long, boolean, void, String},
+  keywordstyle=[2]\color{teal}\bfseries,
+  keywords=[3]{@Test, @BeforeAll, @BeforeEach, @Throws},
+  keywordstyle=[3]\color{violet}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{ % define general preferences
+  language=Java,
+  %backgroundcolor=\color{verylightgray},
+  extendedchars=true,
+  basicstyle=\footnotesize\ttfamily,
+  showstringspaces=false,
+  showspaces=false,
+  numbers=none,
+  numberstyle=\footnotesize,
+  numbersep=9pt,
+  tabsize=2,
+  breaklines=true,
+  showtabs=false,
+  captionpos=b,
+  escapeinside={||},
+}
+
 \begin{document}
 
 \title{Testing Smart Contracts against an Abstract Blockchain Interface}
@@ -323,7 +391,7 @@
 \input{related}
 \input{takamaka}
 \input{interface}
-\input{mocking}
+\input{stubbing}
 \input{experiments}
 \input{conclusion}
 \input{statements}

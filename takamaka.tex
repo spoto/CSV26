@@ -1,1 +1,164 @@
-\section{Takamaka in a Nutshell}\label{sec:takamaka}
+\section{Testing Takamaka in a Nutshell}\label{sec:takamaka}
+
+Takamaka is a minimal, deterministic subset of Java meant for writing Solidity-like
+smart contracts. Java was not devised for writing smart contracts, therefore
+Takamaka adds specific features that are needed for such contracts but are not
+available, normally, in Java: the ability to identify the caller of a method
+or constructor (as \texttt{caller()}) and to limit such caller to specific classes
+(through the annotation \texttt{@FromContract(class)}) and the ability to transfer
+cryptocurrency at a method or constructor call (through the \texttt{@Payable}
+annotation). Moreover, the runtime of Takamaka takes care, automatically, of
+the serialization and deserialization of objects into the state database
+(\cref{fig:architecture}) and it automatically charges and limits the execution
+of Takamaka code through the consumption of gas, exactly as in Solidity.
+This is achieved through a mixture of code instrumentation and code verification
+and it allows the dynamic installation and execution of Java smart contracts in a public
+and permissionless blockchain.
+
+This article is not the place for a complete and detailed description of Takamaka,
+for which we refer to already published literature~\citep{Spoto19,OlivieriST25}.
+The short description in the previous paragraph
+should be enough to understand the examples in this paper.
+
+\begin{figure*}
+  \begin{lstlisting}[language=Takamaka,numbers=left]
+public class Ponzi extends Contract {
+ private final StorageList<PayableContract> investors = new StorageLinkedList<>();|\label{line:investors}|
+
+ public @FromContract(PayableContract.class) Ponzi() {
+  investors.add((PayableContract) caller());|\label{line:add_constructor}|
+ }
+
+ public @Payable @FromContract(PayableContract.class) void invest(long fee) {
+  require(fee >= 1000, "you must invest at least 1000");|\label{line:require}|
+  var split = fee / investors.size();
+  investors.forEach(investor -> investor.receive(split));|\label{line:receive}|
+  investors.add((PayableContract) caller());|\label{line:add_invest}|
+ }
+}
+  \end{lstlisting}
+  \caption{A Takamaka smart contract that implements a Ponzi scheme.}
+  \label{fig:ponzi}
+\end{figure*}
+
+Consider the Takamaka smart contract in \cref{fig:ponzi},
+translated from an equivalent Solidity smart contract by~\cite{IyerD18}. It implements a Ponzi scheme
+that investors can join either by installing an instance of
+the contract (by calling its constructor)
+and becoming its first investor (\cref{line:add_constructor}) or,
+subsequently, by calling the \texttt{invest} method of an existing instance
+of the contract and paying a fee (\cref{line:add_invest}).
+In the latter case, the fee is split among all previous investors (\cref{line:receive}).
+As long as new investors keep joining, previous investors keep earning split fees.
+The last investor will, instead, lose its fee.
+
+Both the constructor of \texttt{Ponzi} and method \texttt{invest} in \cref{fig:ponzi}
+are limited to be called from a class that must extend \texttt{PayableContract}, which is
+a Takamaka library class that implements contracts able to receive a payment through the
+\texttt{receive} method. This is important since investors are kept in a list in the
+persisted state of the object (\cref{line:investors}) and must be able to receive
+split fees whenever a new investor arrives (\cref{line:receive}). Accounts
+are a subclass of \texttt{PayableContract} in Takamaka, controlled through a key pair,
+hence accounts can call both the constructor and \texttt{invest} in \cref{fig:ponzi}.
+\texttt{StorageList}s (\cref{line:investors}) are a deterministic replacement
+of Java's native lists: the latter are not deterministic and therefore cannot be used in blockchain
+and are consequently rejected in Takamaka. Finally, note that method \texttt{receive} of
+\texttt{PayableContract} is final in Takamaka (\ie it cannot be redefined),
+which makes reentrancy impossible at \cref{line:receive} and avoids the complex use of
+Solidity's withdrawing pattern~\citep{AntonopoulosWPMP25} (compare with the Solidity
+code in~\cite{IyerD18}).
+
+\begin{figure*}
+\begin{lstlisting}[language=Java]
+class Ponzi extends HotmokaTest {
+ var PONZI = classNamed("io.hotmoka.examples.ponzi.Ponzi");
+ var PONZI_CONSTR = ConstructorSignatures.of(PONZI);
+ var INVEST = MethodSignatures.of(PONZI, "invest", LONG);
+ var GAS_PRICE = 1;
+ var GAS_LIMIT = 10_000_000;
+
+ @BeforeAll static void beforeAll() {
+  // a macro inherit from HotmokaTest: send to Hotmoka a request to install a jar
+  setJar("ponzi.jar");
+ }
+
+ @BeforeEach void beforeEach() {
+  // a macro inherited from HotmokaTest: send to Hotmoka requests to create 3 accounts
+  setAccounts(1_000_000_000, 1_000_000_000, 1_000_000_000);
+ }
+
+ @Test void feeSplitsCorrectly() {
+  // send to Hotmoka a request to let account(0) create the contract and become the first investor
+  var contract = callConstructor(privateKey(0), account(0), GAS_LIMIT, GAS_PRICE, jar(), PONZI_CONSTR);
+  // take note of the balance of account(0) now
+  var initial = getBalanceOf(account(0));
+  // account(1) invests in the contract
+  var first_fee = 10_000_000;
+  callMethod(privateKey(1), account(1), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, first_fee);
+  // the first investment went to account(0)
+  assertEquals(initial + first_fee, getBalanceOf(account(0)));
+  // account(2) invests in the contract
+  var second_fee = 2_000_000;
+  callMethod(privateKey(2), account(2), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, second_fee);
+  // half of the second investment went to account(0)
+  assertEquals(initial + first_fee + second_fee/2, getBalanceOf(account(0)));
+ }
+
+ @Test void tooSmallFeeThrowsException() {
+  // send to Hotmoka a request to let account(0) create the contract and become the first investor
+  var contract = callConstructor(privateKey(0), account(0), GAS_LIMIT, GAS_PRICE, jar(), PONZI_CONSTR);
+  // account(1) invests too little in the contract
+  var fee = 100;
+  throwsTransactionExceptionWithCauseAndMessage
+   ("io.takamaka.code.lang.RequirementViolationException", "you must invest at least 1000",
+    () -> callMethod(privateKey(1), account(1), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, fee)
+   );
+ }
+}
+\end{lstlisting}
+\caption{Two Java JUnit testcases for the smart contract in \cref{fig:ponzi}.}
+\label{fig:testcases}  
+\end{figure*}
+
+\Cref{fig:testcases} shows a JUnit class with two testcases for the smart contract
+in \cref{fig:ponzi}. This class is a client of the Hotmoka blockchain, that uses its
+abstract interface (\cref{fig:architecture})
+to install the smart contract in \cref{fig:ponzi} and to call its constructor and method.
+Namely, in JUnit, method \texttt{beforeAll} is executed only once, before running the
+testcases of the class. In our case, it installs in blockchain the compiled Java bytecode
+of the contract in \cref{fig:ponzi}, by using the inherited method \texttt{setJar},
+that runs a transaction to install a jar in blockchain. An abstract reference to that
+jar can later be accessed by method \texttt{jar}. Method \texttt{beforeEach}, instead, is
+run before \emph{each} of the testcases. It calls the inherited method \texttt{setAccounts}
+that executes transactions to create three account objects, controlled by three fresh key pairs.
+Such accounts are funded from the \emph{faucet} of the blockchain, that therefore must be a testnet.
+An abstract reference to such objects is later accessible by method \texttt{account} and the fresh
+private key through method \texttt{privateKey}. One needs such keys in order to sign transaction
+requests to execute the constructor and method in \cref{fig:ponzi}.
+
+The two testcases run in the fixture established by \texttt{beforeAll} and \texttt{beforeEach}.
+The first testcase verifies that the fee is split correctly among previous investors.
+It initially creates an instance of the contract, by calling its constructor. It makes account $0$
+pay for that, hence the transaction request must be signed with the private key of that account.
+It writes down the balance of account $0$ and lets account $1$ call \texttt{invest} and become
+an investor. It verifies that the full fee went to the only previous investor,
+which was account $0$. Then it lets account $2$ call \texttt{invest} and become an investor and
+verifies that, this time, only half of the fee went to account $0$.
+
+The second testcase verifies the expected behavior if an investor invests too little
+in the contract. Namely, there is a lower bound to the acceptable fee
+(\cref{line:require} in \cref{fig:ponzi}). Lower fees lead to a transaction failure because
+of a missed requirement. The second testcase in \cref{fig:testcases} creates another instance
+of the smart contract and lets account $1$ invest too little in it. It verifies that
+an exception is thrown, whose cause has the expected exception class and message.
+
+The testcases in \cref{fig:testcases} set a minimal gas price for the transactions that they execute,
+since they are meant to run on a testnet that is programmed to ignore gas prices. This avoids
+testcase failures due to fluctuating gas prices. An alternative would be to query the current gas price of
+the blockchain and use a safe overapproximation, but we do not show it here for simplicity.
+
+If the testcases in \cref{fig:testcases} are run, they both succeed, giving confidence
+in the expected behavior of the smart contract in \cref{fig:ponzi}. From another perspective,
+they support our confidence in the correct implementation of the Hotmoka runtime
+and blockchain (the application and peer in \cref{fig:architecture}) and can be used as
+non-regression tests when the code of such runtime or blockchain must be modified.
