@@ -76,42 +76,45 @@ class Ponzi extends HotmokaTest {
  var INVEST = MethodSignatures.of(PONZI, "invest", LONG);
  var GAS_PRICE = 1;
  var GAS_LIMIT = 10_000_000;
+ var jar;
 
  @BeforeAll static void beforeAll() {
-  // a macro inherit from HotmokaTest: send to Hotmoka a request to install a jar
-  setJar("ponzi.jar");
+  // send to Hotmoka a request to install a jar
+  jar = installJar(privateKeyOfFaucet(), faucet(), GAS_LIMIT, GAS_PRICE, takamakaLib(),
+                   Files.readAllBytes("ponzi.jar"));
  }
 
  @BeforeEach void beforeEach() {
-  // a macro inherited from HotmokaTest: send to Hotmoka requests to create 3 accounts
-  setAccounts(1_000_000_000, 1_000_000_000, 1_000_000_000);
+   // a macro inherited from HotmokaTest: send to Hotmoka requests to create and fund three accounts:
+   // the faucet will pay
+   setAccounts(1_000_000_000, 1_000_000_000, 1_000_000_000);
  }
 
  @Test void feeSplitsCorrectly() {
   // send to Hotmoka a request to let account(0) create the contract and become the first investor
-  var contract = callConstructor(privateKey(0), account(0), GAS_LIMIT, GAS_PRICE, jar(), PONZI_CONSTR);
+  var contract = callConstructor(privateKey(0), account(0), GAS_LIMIT, GAS_PRICE, jar, PONZI_CONSTR);
   // take note of the balance of account(0) now
   var initial = getBalanceOf(account(0));
   // account(1) invests in the contract
   var first_fee = 10_000_000;
-  callMethod(privateKey(1), account(1), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, first_fee);
+  callMethod(privateKey(1), account(1), GAS_LIMIT, GAS_PRICE, jar, INVEST, contract, first_fee);
   // the first investment went to account(0)
   assertEquals(initial + first_fee, getBalanceOf(account(0)));
   // account(2) invests in the contract
   var second_fee = 2_000_000;
-  callMethod(privateKey(2), account(2), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, second_fee);
+  callMethod(privateKey(2), account(2), GAS_LIMIT, GAS_PRICE, jar, INVEST, contract, second_fee);
   // half of the second investment went to account(0)
   assertEquals(initial + first_fee + second_fee/2, getBalanceOf(account(0)));
  }
 
  @Test void tooSmallFeeThrowsException() {
   // send to Hotmoka a request to let account(0) create the contract and become the first investor
-  var contract = callConstructor(privateKey(0), account(0), GAS_LIMIT, GAS_PRICE, jar(), PONZI_CONSTR);
+  var contract = callConstructor(privateKey(0), account(0), GAS_LIMIT, GAS_PRICE, jar, PONZI_CONSTR);
   // account(1) invests too little in the contract
   var fee = 100;
   throwsTransactionExceptionWithCauseAndMessage
    ("io.takamaka.code.lang.RequirementViolationException", "you must invest at least 1000",
-    () -> callMethod(privateKey(1), account(1), GAS_LIMIT, GAS_PRICE, jar(), INVEST, contract, fee)
+    () -> callMethod(privateKey(1), account(1), GAS_LIMIT, GAS_PRICE, jar, INVEST, contract, fee)
    );
  }
 }
@@ -126,14 +129,16 @@ abstract interface (\cref{fig:architecture})
 to install the smart contract in \cref{fig:ponzi} and to call its constructor and method.
 Namely, in JUnit, method \texttt{beforeAll} is executed only once, before running the
 testcases of the class. In our case, it installs in blockchain the compiled Java bytecode
-of the contract in \cref{fig:ponzi}, by using the inherited method \texttt{setJar},
-that runs a transaction to install a jar in blockchain. An abstract reference to that
-jar can later be accessed by method \texttt{jar}. Method \texttt{beforeEach}, instead, is
+(a Java \emph{jar}) of the contract in \cref{fig:ponzi}. It lets the \emph{faucet}
+pay for this transaction. A faucet is an account of a testnet that can be used to
+pay for transactions, \emph{for free}, which is useful during testing.
+A mainnet, of course, has no faucet account. An abstract reference to the installed
+jar is saved as \texttt{jar}. Method \texttt{beforeEach}, instead, is
 run before \emph{each} of the testcases. It calls the inherited method \texttt{setAccounts}
-that executes transactions to create three account objects, controlled by three fresh key pairs.
-Such accounts are funded from the \emph{faucet} of the blockchain, that therefore must be a testnet.
-An abstract reference to such objects is later accessible by method \texttt{account} and the fresh
-private key through method \texttt{privateKey}. One needs such keys in order to sign transaction
+that executes transactions to create and fund three account objects, controlled by three fresh key pairs.
+That macro pays such transactions and funds from the faucet of the blockchain.
+An abstract reference to such objects is later accessible by method \texttt{account} and their fresh
+private keys through method \texttt{privateKey}. One will need such keys in order to sign transaction
 requests to execute the constructor and method in \cref{fig:ponzi}.
 
 The two testcases run in the fixture established by \texttt{beforeAll} and \texttt{beforeEach}.
@@ -148,7 +153,8 @@ verifies that, this time, only half of the fee went to account $0$.
 The second testcase verifies the expected behavior if an investor invests too little
 in the contract. Namely, there is a lower bound to the acceptable fee
 (\cref{line:require} in \cref{fig:ponzi}). Lower fees lead to a transaction failure because
-of a missed requirement. The second testcase in \cref{fig:testcases} creates another instance
+of a missed requirement. To verify that behavior, the second testcase in \cref{fig:testcases}
+creates another instance
 of the smart contract and lets account $1$ invest too little in it. It verifies that
 an exception is thrown, whose cause has the expected exception class and message.
 

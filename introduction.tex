@@ -120,14 +120,14 @@ radical shift of consensus algorithm.
 This has been possible because the abstract API between clients and peer
 is the same, regardless of the implementation of the peer and of its consensus
 algorithm. The existence of this abstract interface has also allowed us
-to apply the traditional mocking approach to it: the peer
-in \cref{fig:architecture} has been replaced with a mocked peer that does
+to apply the traditional stubbing approach to it: the peer
+in \cref{fig:architecture} has been replaced with a stubbed peer that does
 not implement consensus nor gossiping, but just executes the transaction
 requests with an actual application. The advantage is that
 testcases can be executed must faster (minutes) than against an actual peer
 of an actual blockchain (hours),
 that must abide to consensus and create blocks slowly, at regular intervals.
-The limit is that mocking only allows one to test the application
+The limit is that stubbing only allows one to test the application
 (\cref{fig:architecture}), since the other components are mocked.
 Nevertheless, this approach has been very useful to reduce the time
 for the development of the Hotmoka application and currently runs during its
@@ -137,12 +137,13 @@ The contributions of this article are the following:
 %
 \begin{itemize}
 \item the description of the abstract API between the clients and an
-  Hotmoka blockchain peer;
+  Hotmoka blockchain peer, meant to allow the execution of object-oriented
+  code in blockchain;
 \item the description of how that API allows one to
   run testcases of smart contracts
   against different implementations of the peer, with different
   consensus algorithms;
-\item the mocking strategy of the peer, that makes the execution of the
+\item a stubbing strategy for the peer, that makes the execution of the
   testcases faster and allows their use for continuous integration.
 \end{itemize}
 
