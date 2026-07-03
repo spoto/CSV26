@@ -15,7 +15,7 @@ testnets. But this solution has a clear drawback: the execution time
 of the testcases becomes relatively long, since an actual testnet
 creates an actual blockchain and the block creation rate cannot be
 too small, or otherwise synchronization between the peers might be lost.
-With a block creation rate of $10$ seconds (hence quite short) the
+With a block creation rate of $3$ seconds (hence quite short) the
 execution of the testcases in \cref{fig:testcases} requires around one minute,
 since the calls to \texttt{installJar}, \texttt{setAccounts},
 \texttt{callConstructor} and \texttt{callMethod} trigger a transaction request

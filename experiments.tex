@@ -1,1 +1,55 @@
 \section{Experiments}\label{sec:experiments}
+
+This section shows the execution of a large set of testcases
+against the abstract blockchain interface of \cref{sec:interface}, but instantiated
+with different concrete and stubbed implementations of the blockchain peer.
+Namely, Hotmoka's source code
+comes with $422$ testcases (including the two in \cref{fig:testcases}),
+that have been developed in order to
+verify the correctness of Takamaka smart contracts, including some from the standard
+library shipped with Takamaka itself, and to provide non-regression tests
+for the development of the Hotmoka application itself.
+Such testcases can be found inside the \texttt{io-hotmoka-tests} module
+of Hotmoka~\citep{hotmokacode}. The interested reader can execute
+such testcases by following the instructions at
+\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/README.md}.
+We have run the testcases on an Intel Core i3-10110U $\times$ 4 Linux Ubuntu 26.04 machine
+with $16$ gigabytes of RAM. However, the specific configuration of the testing machine
+is largely irrelevant, since these tests use almost no RAM and their speed depends on the
+block creation rate of the blockchain, not on the speed of the processor,
+except for the stubbed nodes.
+
+\begin{figure*}
+  \begin{center}
+  \begin{tabular}{|c|c|c||r|r|r|}
+    \hline
+    \textbf{implementation} & \textbf{\#peers} & \textbf{rate} & \textbf{successes} & \textbf{failures} & \textbf{time}\\\hline\hline
+    Tendermint & 1 & 4000 & 422 & 0 & 3h03m55s\\\hline
+    Tendermint & 4 & 3000 & 422 & 0 & 2h35m11s\\\hline
+    Tendermint remote & 4 & 3000 & 422 & 0 & 2h49m07s\\\hline
+    Mokamint & 1 & 4000 & 422 & 0 & 3h05m01s\\\hline
+    Mokamint & 4 & 3000 & 355 & \textbf{67} & 3h16m06s\\\hline
+    Mokamint remote & 1 & 4000 & 422 & 0 & 3h21m13s\\\hline
+    stubbed & - & - & 422 & 0 & 2m42s\\\hline
+    stubbed remote & - & - & 422 & 0 & 3m21s\\\hline
+  \end{tabular}
+  \caption{Experiments with the execution of the testcases shipped with the
+    source code of Hotmoka, by using varying implementations and configurations for the
+    testing blockchain; \textbf{implementation} is the specific implementation
+    used for the abstract blockchain interface in \cref{sec:interface};
+    \textbf{\#peers} is the number of peers in the test blockchain;
+    \textbf{rate} is the block creation rate of the test blockchain
+    (milliseconds between two successive blocks);
+    \textbf{successes} is the number of testcases that pass successfully;
+    \textbf{failures} is the number of testcases that fail; \textbf{time}
+    is the total time for the execution of all the testcases.
+    Stubbed peers do not create a real blockchain and do not form a network,
+    but just execute the transaction requests in isolation, therefore
+    \textbf{\#peers} and \textbf{rate} has no meaning for them.
+    Remote peers receive method calls through a network; otherwise, peers are contacted
+    by calling their methods directly, as normal Java objects. Bboth remote and non-remote
+    peers are running in the same machine used for the testing.
+  }
+  \label{fig:experiments}
+  \end{center}
+\end{figure*}
