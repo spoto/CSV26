@@ -1,1 +1,89 @@
 \section{Stubbing the Abstract Blockchain Interface}\label{sec:stubbing}
+
+The testcases in \cref{fig:testcases} can be executed over the abstract
+blockchain interface of \cref{sec:interface}, whose implementation can
+be an actual blockchain testnet. As seen in \cref{sec:takamaka},
+one needs a testnet in order to exploit the
+existence of a faucet, useful to establish the fixture of the testcases.
+This solution works perfectly and has the advantage of testing the full
+execution stack in \cref{fig:architecture}: not just the client executing
+the testcases but also the peer, the Hotmoka application, the miners and even
+other peers that might be connected through gossiping and might contribute
+to the execution of the transaction requests. Namely, \cref{sec:experiments}
+will report experiments with the execution of testcases over actual
+testnets. But this solution has a clear drawback: the execution time
+of the testcases becomes relatively long, since an actual testnet
+creates an actual blockchain and the block creation rate cannot be
+too small, or otherwise synchronization between the peers might be lost.
+With a block creation rate of $10$ seconds (hence quite short) the
+execution of the testcases in \cref{fig:testcases} requires around one minute,
+since the calls to \texttt{installJar}, \texttt{setAccounts},
+\texttt{callConstructor} and \texttt{callMethod} trigger a transaction request
+that must be included in the next block before the next call can be executed.
+The asynchronous versions of such calls would not help here: these testcases
+need to wait until requests get executed and transactions have modified
+the state, before checking assertions on the modified state or sending
+a new request from the modified state.
+
+Slow testcases means that they cannot be used for continuous integration,
+at least not on a regular basis, after each commit. For instance,
+they cannot be used as non-regression tests during a modification of
+the code of the application in \cref{fig:architecture}. But this was one
+of the reasons of this article: allowing improvements and optimizations to
+the Hotmoka application and using the testcases on the smart contracts
+as non-regression tests during continuous integration.
+The solution has been to provide a stubbed version of the blockchain peer,
+that just passes calls to the API in \cref{fig:api}
+over to the Hotmoka application (\cref{fig:stubbed}).
+The rest of the abstract blockchain interface described
+in \cref{sec:interface} has been mocked (for instance,
+calls about the configuration or the
+index of the node). The stubbed peer does not use any database of blocks since
+it does not even keep a blockchain. Therefore, there is no block
+creation rate and the calls in \cref{fig:api} are executed immediately,
+at the maximal speed allowed by the Hotmoka application.
+There is no mining nor gossiping, nor other connected peers to synchronize with.
+
+\begin{figure*}[t]
+  \begin{center}
+    \begin{tikzpicture}
+      \draw [fill=verylightviolet,thick] (-0.5,-0.8) rectangle +(4,2.3);
+      \draw (1.5,-0.1) node {stubbed peer};
+
+      \draw[->, thick] (-4,-0.45) -- (-0.5,-0.45);
+      \draw (-2.25,-0.7) node {transaction requests};
+      \draw (-2.25,-0.2) node {{\small API}};
+      \draw[<-, thick] (-4,0) -- (-0.5,0);
+      \draw (-2.25,0.3) node {transaction responses};
+      \draw [fill=verylightblue,thick] (-6,-0.6) rectangle +(2,0.8);
+      \draw (-5,-0.2) node {client(s)};
+
+      \draw [fill=verylightgreen,thick] (0.5,2.6) rectangle +(2,1.5);
+      \draw (1.5,3.6) node {Hotmoka};
+      \draw (1.5,3.2) node {application};
+      \draw[-, thick] (0.5,3.4) -- (-1,3.4);
+      \draw (-1,3.4) node[scale=0.7] {\db};
+      \draw (-1,2.5) node {database of states};
+
+      \draw[<-, thick] (1.2,1.5) -- (1.2,2.6);
+      \draw[<-, thick] (1.8,2.6) -- (1.8,1.5);
+
+      \draw[-, dashed] (1.2,1.5) -- (-0.5,0);
+      \draw[-, dashed] (1.8,1.5) -- (-0.5,-0.45);
+    \end{tikzpicture}
+  \end{center}
+  \caption{A stubbed blockchain peer.
+    It just forwards the abstract blockchain API calls
+    from the clients to the Hotmoka application.}
+  \label{fig:stubbed}
+\end{figure*}
+
+Still, the stubbed peer in \cref{fig:stubbed} has the same abstract blockchain interface
+as a real peer. Therefore, testcases such as those in \cref{fig:testcases} can be run
+against it, without any modification: a switch in the test execution invocation
+provides different instantiations for the peer. This is an application of the
+traditional open-closed principle of software engineering~\citep{Meyer97}.
+
+\Cref{sec:experiments} will confirm that testcases executed against a stubbed peer
+are quite fast, enough to use them as non-regression tests during continuous
+integration, for the development of the Hotmoka application.
