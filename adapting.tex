@@ -1,0 +1,90 @@
+\section{Adapting the Abstract Blockchain Interface}\label{sec:adapting}
+
+\begin{figure*}
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+     \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightviolet,thick] (0,0) rectangle +(1.5,1);      
+      \draw (0.75,0.5) node {peer};
+      \draw[<->] (-1.5,0.5) -- (0,0.5);
+      \draw (-0.75,0.7) node {{\scriptsize API calls}};
+      \draw (-2.1,0.55) node {clients};
+    \end{tikzpicture}
+     \caption{A blockchain peer and its clients connected, directly,
+       through method calls to the abstract blockchain interface.
+       Both peer and clients are running in the same JVM, in the same machine,
+       as Java objects: clients can call the methods of the peer.}
+     \label{fig:local_peer}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[b]{0.3\textwidth}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightyellow,thick] (-0.2,-0.2) rectangle +(1.9,1.7);
+      \draw (0.75,1.25) node {peer service};
+      \draw [fill=verylightviolet,thick] (0,0) rectangle +(1.5,1);      
+      \draw (0.75,0.5) node {peer};
+      \draw[<->] (-2,0.5) -- (-0.2,0.5);
+      \draw (-1.1,0.7) node {{\scriptsize network calls}};
+      \draw (-2.6,0.55) node {clients};
+    \end{tikzpicture}
+    \caption{A blockchain peer, published as a network service
+      whose abstract blockchain application can be called through network calls,
+      whose arguments and results are represented in JSON format.
+      Peer and clients can run in different JVM and different machines.}
+    \label{fig:web_peer}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[b]{0.3\textwidth}
+    \begin{tikzpicture}[scale=1]
+      \draw [fill=verylightred,thick] (-0.4,-0.4) rectangle +(2.3,2.4);
+      \draw (0.75,1.75) node {remote peer};
+      \draw [fill=verylightyellow,thick] (-0.2,-0.2) rectangle +(1.9,1.7);
+      \draw (0.75,1.25) node {peer service};
+      \draw [fill=verylightviolet,thick] (0,0) rectangle +(1.5,1);      
+      \draw (0.75,0.5) node {peer};
+      \draw[<->] (-2.2,0.5) -- (-0.4,0.5);
+      \draw (-1.3,0.7) node {{\scriptsize API calls}};
+      \draw (-2.8,0.55) node {clients};
+    \end{tikzpicture}
+    \caption{The network service of a blockchain peer, adapted to the
+      abstract blockchain interface as a remote peer. This allows clients
+      to interact with the peer with the same method calls used
+      in~(a), hiding the fact that the peer
+      is remote, potentially running on a different machine.}
+    \label{fig:remote_peer}
+  \end{subfigure}
+  \caption{Adaptation of a peer to a network service, in order to make it accessible
+    through network calls from clients running in different machines; its further
+    adaptation as a remote peer, in order to use the same
+    abstract blockchain interface also for peers running in different machines.}
+\end{figure*}
+
+The testcases in \cref{sec:takamaka} can be run as clients against a peer, created
+as a Java object in the same JVM where the testcases are executed
+(\cref{fig:local_peer}). In this case, the testcases can execute the API
+calls in \cref{fig:api} directly. However, another, more realistic, scenario is that
+of a peer running in a different machine and published as a web service, that can be
+used by clients through network calls corresponding to
+the method calls in \cref{fig:api}, whose arguments and results
+are represented in JSON format (\cref{fig:web_peer}). This scenario requires to
+modify the testcases in \cref{fig:testcases}, in order to replace the direct method
+calls in \cref{fig:api} with network calls. It also requires to represent API arguments
+in JSON format and back. This modification is problematic since it is against
+the open-closed principle: our testcases should be open to extension
+(\ie able to run both on a local and a peer reachable thirough a network)
+without requiring their
+code modification. Concretely, we should maintain two versions of the testcases,
+either for testing agains a local peer and another for testing against a peer
+accessible through the network.
+In order to avoid this software engineering problem, we have adapted
+network-reachable peers to the API in \cref{fig:api}, through the adaptor
+design pattern~\citep{GammaHJV95}. This is shown in \cref{fig:remote_peer}. A remote peer
+is a Java object that implements the API in \cref{fig:api} and adapts
+them into network calls over JSON-represented arguments, and back.
+A remote peer has the same interface as a local peer, therefore the testcases
+in \cref{fig:testcases} needn't be modified to run against a remote peer.
+
+\Cref{sec:experiments} reports experiments with both local and remote peers.
+In the latter case, experiments are more realistic since the testcases
+cover also the networking layer of the peers and the representation into and from JSON
+of the API calls' arguments.

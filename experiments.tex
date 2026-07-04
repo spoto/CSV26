@@ -11,32 +11,36 @@ library shipped with Takamaka itself, and to provide non-regression tests
 for the development of the Hotmoka application itself.
 Such testcases can be found inside the \texttt{io-hotmoka-tests} module
 of Hotmoka~\citep{hotmokacode}. The interested reader can execute
-such testcases by following the instructions at
+these experiments by following the instructions at
 \url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/README.md}.
-We have run the testcases on an Intel Core i3-10110U $\times$ 4 Linux Ubuntu 26.04 machine
+We have run the testcases on an Intel Core i3-10110U\ $\times$\ 4
+Linux Ubuntu 26.04 machine
 with $16$ gigabytes of RAM. However, the specific configuration of the testing machine
 is largely irrelevant, since these tests use almost no RAM and their speed depends on the
 block creation rate of the blockchain, not on the speed of the processor,
-except for the stubbed nodes.
+except for the experiments with the stubbed peers.
 
 \begin{figure*}
   \begin{center}
-  \begin{tabular}{|c|c|c||r|r|r|}
+  \begin{tabular}{|c|c|c|c||r|r|r|}
     \hline
-    \textbf{implementation} & \textbf{\#peers} & \textbf{rate} & \textbf{successes} & \textbf{failures} & \textbf{time}\\\hline\hline
-    Tendermint & 1 & 4000 & 422 & 0 & 3h03m55s\\\hline
-    Tendermint & 4 & 3000 & 422 & 0 & 2h35m11s\\\hline
-    Tendermint remote & 4 & 3000 & 422 & 0 & 2h49m07s\\\hline
-    Mokamint & 1 & 4000 & 422 & 0 & 3h05m01s\\\hline
-    Mokamint & 4 & 3000 & 355 & \textbf{67} & 3h16m06s\\\hline
-    Mokamint remote & 1 & 4000 & 422 & 0 & 3h21m13s\\\hline
-    stubbed & - & - & 422 & 0 & 2m42s\\\hline
-    stubbed remote & - & - & 422 & 0 & 3m21s\\\hline
+    \textbf{implementation} & \textbf{locality} & \textbf{\#peers} & \textbf{rate} & \textbf{successes} & \textbf{failures} & \textbf{time}\\\hline\hline
+    Tendermint & local & 1 & 4000 & 422 & 0 & 3h03m55s\\\hline
+    Tendermint & local & 4 & 3000 & 422 & 0 & 2h35m11s\\\hline
+    Tendermint & remote & 4 & 3000 & 422 & 0 & 2h49m07s\\\hline
+    Mokamint & local & 1 & 4000 & 422 & 0 & 3h05m01s\\\hline
+    Mokamint & local & 4 & 3000 & 355 & \textbf{67} & 3h16m06s\\\hline
+    Mokamint & remote & 1 & 4000 & 422 & 0 & 3h21m13s\\\hline
+    stubbed & local & - & - & 422 & 0 & 2m42s\\\hline
+    stubbed & remote & - & - & 422 & 0 & 3m21s\\\hline
   \end{tabular}
   \caption{Experiments with the execution of the testcases shipped with the
     source code of Hotmoka, by using varying implementations and configurations for the
     testing blockchain; \textbf{implementation} is the specific implementation
     used for the abstract blockchain interface in \cref{sec:interface};
+    \textbf{locality} distinguishes experiments against a \emph{local} peer
+    (\cref{fig:local_peer}) from experiments against a \emph{remote} peer
+    (\cref{fig:remote_peer});
     \textbf{\#peers} is the number of peers in the test blockchain;
     \textbf{rate} is the block creation rate of the test blockchain
     (milliseconds between two successive blocks);

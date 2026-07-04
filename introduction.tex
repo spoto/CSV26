@@ -122,13 +122,14 @@ is the same, regardless of the implementation of the peer and of its consensus
 algorithm. The existence of this abstract interface has also allowed us
 to apply the traditional stubbing approach to it: the peer
 in \cref{fig:architecture} has been replaced with a stubbed peer that does
-not implement consensus nor gossiping, but just executes the transaction
-requests with an actual application. The advantage is that
-testcases can be executed must faster (minutes) than against an actual peer
+not implement consensus nor gossiping, but just forwards the transaction
+requests to an actual application. The advantage is that
+testcases can be executed much faster (minutes) than against an actual peer
 of an actual blockchain (hours),
-that must abide to consensus and create blocks slowly, at regular intervals.
-The limit is that stubbing only allows one to test the application
-(\cref{fig:architecture}), since the other components are mocked.
+that must abide to consensus and creates blocks slowly, at regular intervals.
+The limit is that stubbing only allows one to test the smart contract,
+the application
+(\cref{fig:architecture}) but not the full peer, since some components are mocked.
 Nevertheless, this approach has been very useful to reduce the time
 for the development of the Hotmoka application and currently runs during its
 continuous integration as a Github action.
@@ -143,16 +144,27 @@ The contributions of this article are the following:
   run testcases of smart contracts
   against different implementations of the peer, with different
   consensus algorithms;
-\item a stubbing strategy for the peer, that makes the execution of the
-  testcases faster and allows their use for continuous integration.
+\item a stubbed implementation of the peers, that makes the execution of the
+  testcases faster and allows their use for continuous integration, but still keeps
+  their same abstract API;
+\item an adaptor for remote peers, that allows one to execute testcases
+  against a local peer as well as against a remote peer, always using the
+  same abstract API.
 \end{itemize}
+
+The use of a single API, for local, remote, actual or stubbed peers, allows one
+to run the same testcases against all possible implementations, without modification,
+in accordance with the open-closed principle~\citep{Meyer97}.
 
 The rest of this article is organized as follows. \Cref{sec:related} reports
 related works. \Cref{sec:takamaka} presents an example of smart contract
 in the Takamaka subset of Java used by Hotmoka and of a testcase for that
 smart contract. \Cref{sec:interface} presents the API between clients
 and Hotmoka peers. \Cref{sec:stubbing} describes the implementation
-of a stubbed Hotmoka peer, that still uses an actual application to run
-smart contract transactions. \Cref{sec:experiments} reports experiments with
+of a stubbed Hotmoka peer.
+\Cref{sec:adapting} shows how the API between clients and peers can be adapted to
+a remote peer, potentially running in another machine and reachable thorugh
+network calls. \Cref{sec:experiments} reports experiments with
 the testing of Takamaka smart contracts against different implementations
-of the API, including the stubbed one. \Cref{sec:conclusion} concludes.
+of the API, including the stubbed one, both local and remote.
+\Cref{sec:conclusion} concludes.
