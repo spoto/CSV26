@@ -1,1 +1,34 @@
 \section{Conclusion}\label{sec:conclusion}
+
+This article has shown that a single abstract blockchain interface
+can be used for different implementations of a blockchain peer.
+This allows one to use the same testcases, unchanged, against different
+configurations of the blockchain used for testing, with different consensus
+and number of peers, both local and remote. Moreover, a stubbed implementation
+of the peer allows one to execute the testcases in a few minutes, which
+makes them adequate for continuous integration.
+
+The ability to run the testcases against blockchains with completely
+diffent consensus has been invaluable when we implemented
+Hotmoka over the Mokamint engine (proof of space), after its
+implementation over the Tendermint engine (proof of stake) had been completed.
+In this case, the testcases have been used as non-regression tests.
+In general, testcases can both support confidence in the
+correctness of the smart contracts and provide a non-regression check for the
+peer used for testing.
+
+This article focused on the Hotmoka blockchain and on Takamaka smart contracts,
+since it originated during the development of the latter blockchain.
+However, a single abstract blockchain interface can be used also
+for other blockchains, such as Web3 for Ethereum.
+
+A limit of testing for smart contracts is that the blockchain used for
+testing must have deterministic finality, since otherwise there might be
+history changes that make some tests fail (\cref{fig:experiments}).
+This is a general result,
+not related to the use of a single abstract blockchain interface.
+A possible solution is to introduce a delay between transaction requests,
+in order to give the blockchain the time to stabilize. But this would
+further increase the time for executing the testcases,
+that is already significant
+for non-stubbed peer implementations (\cref{fig:experiments}).
