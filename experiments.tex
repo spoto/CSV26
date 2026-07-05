@@ -1,13 +1,13 @@
 \section{Experiments}\label{sec:experiments}
 
 This section shows the execution of a large set of testcases
-against the abstract blockchain interface of \cref{sec:interface}, but instantiated
-with different concrete and stubbed implementations of the blockchain peer.
-Namely, Hotmoka's source code
+against the abstract blockchain interface of \cref{sec:interface}, instantiated
+with different concrete and stubbed implementations of the blockchain peer, both
+local and remote. Namely, the source code of Hotmoka
 comes with $422$ testcases (including the two in \cref{fig:testcases}),
 that have been developed in order to
 verify the correctness of Takamaka smart contracts, including some from the standard
-library shipped with Takamaka itself, and to provide non-regression tests
+library shipped with Takamaka itself, and to provide a non-regression check
 for the development of the Hotmoka application itself.
 Such testcases can be found inside the \texttt{io-hotmoka-tests} module
 of Hotmoka~\citep{hotmokacode}. The interested reader can execute
@@ -31,8 +31,8 @@ except for the experiments with the stubbed peers.
     Mokamint & local & 1 & 4000 & 422 & 0 & 3h05m01s\\\hline
     Mokamint & local & 4 & 3000 & 355 & \textbf{67} & 3h16m06s\\\hline
     Mokamint & remote & 1 & 4000 & 422 & 0 & 3h21m13s\\\hline
-    stubbed & local & - & - & 422 & 0 & 2m42s\\\hline
-    stubbed & remote & - & - & 422 & 0 & 3m21s\\\hline
+    stubbed & local & 1 & - & 422 & 0 & 2m42s\\\hline
+    stubbed & remote & 1 & - & 422 & 0 & 3m21s\\\hline
   \end{tabular}
   \caption{Experiments with the execution of the testcases shipped with the
     source code of Hotmoka, by using varying implementations and configurations for the
@@ -48,12 +48,46 @@ except for the experiments with the stubbed peers.
     \textbf{failures} is the number of testcases that fail; \textbf{time}
     is the total time for the execution of all the testcases.
     Stubbed peers do not create a real blockchain and do not form a network,
-    but just execute the transaction requests in isolation, therefore
-    \textbf{\#peers} and \textbf{rate} has no meaning for them.
-    Remote peers receive method calls through a network; otherwise, peers are contacted
-    by calling their methods directly, as normal Java objects. Bboth remote and non-remote
-    peers are running in the same machine used for the testing.
+    but just execute the transaction requests, therefore, for them,
+    \textbf{\#peers} can only be $1$ and \textbf{rate} has no meaning.
   }
   \label{fig:experiments}
   \end{center}
 \end{figure*}
+
+\Cref{fig:experiments} shows the results of the testcases, executed against
+different implementations of the testing blockchain. For instance, the first row shows
+that the execution of the testcases against a local peer of a blockchain consisting of
+that peer only, built over the Tendermint consensus engine, creating a block every $4000$
+milliseconds, takes around three hours. All testcases succeed. The second row shows
+that the reduction of the block creation rate to $3000$ milliseconds reduces the time for
+running the tests, to around two hours and a half. This time, the blockchain consists of
+four peers, one of which receives the transaction requests for running the tests.
+All tests succeed, also in this case. The third row runs the tests in the same
+configuration as above, but against a remote peer, contacted through network calls.
+The execution takes some minutes more, because of network delays, and all tests suceed.
+
+The subsequent three rows in \cref{fig:experiments} run the testcases
+against peers implemented
+over the Mokamint proof of space consensus engine. The blockchain is first made of a single peer creating a block very $4000$ milliseconds, on average. Then it is made of four peers,
+creating a block every $3000$ milliseconds. Finally, it is made of a single remote peer,
+creating a block every $4000$ milliseconds and contacted through network calls. The
+interesting point, here, is that a Mokamint network of more than one peer makes
+some testcases fail ($67$ in our execution). This is because Mokamint has probabilistic
+finality, like Bitcoin and like the first Ethereum, therefore the history of the
+blockchain might change, until it finally stabilizes. Changes of history in the middle
+of a testcase means that objects might ``disappear'' or change address, which makes
+the testcase fail. Namely, the number of failing testcases is not constantly $67$,
+but we have verified that it varies in different executions of the testcases, randomly.
+
+Finally, the last two rows of \cref{fig:experiments} show experiments with a stubbed
+peer, first local then remote. Stubbed peers do not keep any blockchain, therefore
+there is no block creation rate for them. All tests succeed. The important aspect is
+that the execution time is very small, just a few minutes, which makes
+this configurations adequate for continuous integration. The last configuration
+is that used in the Github action triggered at every commit on the Hotmoka repository.
+
+It is important to recall that the same testcases, unchanged, are used for all
+configurations in \cref{fig:testcases}. This is a significant engineering simplification
+and follows from the use of the same abstract blockchain interface for all
+configurations of the peer.
