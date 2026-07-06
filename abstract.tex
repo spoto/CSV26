@@ -3,14 +3,17 @@ interact with a blockchain allows one
 to write testcases for smart contracts once,
 and reuse them against different implementations of the testing blockchain.
 Namely, blockchains might consists of a varying number of peers,
-with different consensus algorithms. There are local peers (directly contacted
+with different consensus algorithms. There might be
+local peers (directly contacted
 as an object in RAM) and remote peers (contacted through a network).
-The same blockchain interface respect the open-closed software engineering
+The use of a single abstract blockchain interface
+respects the open-closed software engineering
 principle. Moreover, by stubbing the abstract blockchain interface,
 it becomes possible to execute the
-testcases quickly enough to allow their use during continuous integration.
-An interesting aspect of using a single abstract interface for different
+testcases quickly enough to allow their use during continuous integration,
+without any code modification Another interesting consequence
+of using a single abstract interface for different
 peer implementations is that testcases become non-regression tests
-for modifications of the code of the blockchain peers, for instance when replacing
-their consensus algorithm, as it actually happened during the development of the
-Hotmoka blockchain.
+for modifications of the code of the blockchain peer,
+for instance when replacing its consensus algorithm,
+as it actually happened during the development of the Hotmoka blockchain.
