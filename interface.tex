@@ -3,7 +3,7 @@
 The testcases in \cref{fig:testcases} are clients that
 execute against an abstract blockchain interface
 of transaction requests and responses (see the left side of \cref{fig:architecture}).
-That interface consists of the API in \cref{fig:api}, that allow one to use the blockchain
+That interface consists of the methods in \cref{fig:api}, that allow one to use the blockchain
 as a persistent storage for object-oriented programming.
 %
 \begin{figure*}
@@ -13,12 +13,12 @@ as a persistent storage for object-oriented programming.
   \item[\texttt{result = callMethod(key, payer, gasLimit, gasPrice, classpath, method, receiver[, args...])}]
   \item[\texttt{result = runMethod(caller, gasLimit, classpath, method, receiver[, args...])}]
   \end{description}
-  \caption{The abstract blockchain interface that allows clients to execute
+  \caption{The abstract blockchain interface (ABI) that allows clients to execute
   object-oriented Java code in blockchain.}
   \label{fig:api}
 \end{figure*}
 
-The API method \texttt{installJar} installs a jar in blockchain.
+Method \texttt{installJar} installs a jar in blockchain.
 That jar will typically contain the code of new classes (hence also of new contracts)
 that can be later referenced by using \texttt{reference} as classpath for future constructor or method
 invocations. The installation is paid by an account \texttt{payer}, whose private \texttt{key} is used
@@ -27,7 +27,7 @@ to sign the transaction request. The request is run only if the current gas pric
 are those of the jar to install. Classes inside such jar can reference other classes, previously
 installed in blockchain, through the optional \texttt{classpath} reference. In most cases, the latter
 is the reference to the runtime of Takamaka, that has been installed at
-\texttt{takamakaLib} during the blockchain initialization. The result of \texttt{installJar} is
+\texttt{takamakaLib} during blockchain initialization. The result of \texttt{installJar} is
 an abstract, machine-independent \texttt{reference} to where the jar has been installed in blockchain.
 For instance, in method \texttt{beforeAll}
 in \cref{fig:testcases}, the jar containing the compiled Java bytecode of the contract in
@@ -36,7 +36,7 @@ The faucet account of the testnet is used to pay for the installation. The runti
 is used as classpath, so that for instance the library classes \texttt{Contract} and
 \texttt{StorageLinkedList} used in \cref{fig:ponzi} get correctly resolved.
 
-The API method \texttt{callConstructor} calls a constructor of a class and yields the
+Method \texttt{callConstructor} calls a constructor of a class and yields the
 machine-independent \texttt{reference} to where the resulting object
 has been allocated in blockchain. Its parameters are the same as for \texttt{installJar}, but it needs the
 signature of the \texttt{constructor} to call (class name and argument types), instead of the \texttt{bytes}
@@ -47,7 +47,7 @@ in blockchain earlier. An example of use of \texttt{callConstructor} is in the t
 Moreover, \texttt{callConstructor} is also used inside the implementation (not shown) of the
 macro \texttt{setAccounts} used in \texttt{beforeEach} in \cref{fig:testcases}, to instantiate new accounts.
 
-The API method \texttt{callMethod} calls a method of an already existing object (called \texttt{receiver}) and yields
+Method \texttt{callMethod} calls a method of an already existing object (called \texttt{receiver}) and yields
 the optional result of the method (for non-\texttt{void} methods). It requires the same parameters
 as \texttt{callConstructor}, but it needs a method signature (class name, method name and argument types)
 instead of a constructor signature. Moreover, it requires the machine-independent reference
@@ -56,25 +56,25 @@ For instance, \texttt{callMethod} is used in the two testcases in \cref{fig:test
 \texttt{void} method \texttt{invest} on an already existing \texttt{contract} of the \texttt{Ponzi} class
 in \cref{fig:ponzi}. The only argument for \texttt{invest} is the fee to invest.
 
-The API method \texttt{runMethod} is similar to \texttt{callMethod} but can only be used to call
-side-effect free methods (also called \emph{view} methods in Solidity terminology). Such methods do not
+Method \texttt{runMethod} is similar to \texttt{callMethod} but can only be used to call
+side-effect-free methods (also called \emph{view} methods in Solidity terminology). Such methods do not
 modify the state database (\cref{fig:architecture}) and consequently needn't be included in blocks and
 can be execute \emph{for free}, without requiring a signature nor a payment of gas. Therefore, such calls
 have a \texttt{caller} rather than a \texttt{payer}. There is still a maximal
 limit to the gas cost of the method, in order to avoid infinite executions. The Hotmoka runtime will
 ensure that the executed method has no side-effects, and the transaction will fail otherwise.
 For instance, \texttt{runMethod} is used in the implementation of \texttt{getBalanceOf} in \cref{fig:testcases}
-(not shown), to call the side-effect free \texttt{balance} method of a contract.
+(not shown), to call the side-effect-free \texttt{balance} method of a contract.
 
-The API in \cref{fig:api} has been explicitly simplified. The interested reader will find
-the actual, complete API as interface \texttt{io.hotmoka.node.api.Node} in~\cite{hotmokacode}.
-The latter has additional API methods for calling static methods (that miss the \texttt{receiver}),
+The ABI in \cref{fig:api} has been explicitly simplified. The interested reader will find
+the actual, complete ABI as interface \texttt{io.hotmoka.node.api.Node} in~\cite{hotmokacode}.
+The latter has additional methods for calling Java static methods (that do not have a \texttt{receiver}),
 for accessing the current state of an object, its index (history),
 the manifest and the configuration of the blockchain and the set of responses/requests executed so far.
 Moreover, paid methods (as the first three in \cref{fig:api}) require a \emph{nonce} to avoid
-request replaying (as in Solidity). We do not discuss this here for simplicity. Such nonces are automatically
-computed by the superclass \texttt{HotmokaTest} in \cref{fig:testcases}. Finally, the API in
-\cref{fig:api} is synchronous, while the actual API has also asynchronous versions of the first three
+request replaying (as in Solidity). We do not show this here for simplicity. In practice, such nonces are automatically
+computed by the superclass \texttt{HotmokaTest} in \cref{fig:testcases}. Finally, the ABI in
+\cref{fig:api} is synchronous, while the actual ABI has also asynchronous versions of the first three
 methods in \cref{fig:api}, that do not yield a reference or result but a future to them. Asynchronicity
 allows one sometimes to write faster testcases, when the outcome of a transaction needn't be committed before
 a subsequent transaction can be executed. We do not show this here.

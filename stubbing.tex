@@ -1,7 +1,7 @@
 \section{Stubbing the Abstract Blockchain Interface}\label{sec:stubbing}
 
-The testcases in \cref{fig:testcases} can be executed over the abstract
-blockchain interface of \cref{sec:interface}, whose implementation can
+The testcases in \cref{fig:testcases} can be executed over the ABI
+of \cref{sec:interface}, whose implementation can
 be an actual blockchain testnet. As seen in \cref{sec:takamaka},
 one needs a testnet in order to exploit the
 existence of a faucet, useful to establish the fixture of the testcases.
@@ -15,7 +15,7 @@ testnets. But this solution has a clear drawback: the execution time
 of the testcases becomes relatively long, since an actual testnet
 creates an actual blockchain and the block creation rate cannot be
 too small, or otherwise synchronization between the peers might be lost.
-With a block creation rate of $3$ seconds (hence quite short) the
+With a block creation rate of $3$ seconds (already quite short) the
 execution of the testcases in \cref{fig:testcases} requires around one minute,
 since the calls to \texttt{installJar}, \texttt{setAccounts},
 \texttt{callConstructor} and \texttt{callMethod} trigger a transaction request
@@ -33,12 +33,12 @@ of the reasons of this article: allowing improvements and optimizations to
 the Hotmoka application and using the testcases on the smart contracts
 as non-regression tests during continuous integration.
 The solution has been to provide a stubbed version of the blockchain peer,
-that just passes calls to the API in \cref{fig:api}
+that just passes calls to the ABI in \cref{fig:api}
 over to the Hotmoka application (\cref{fig:stubbed}).
-The rest of the abstract blockchain interface described
+The rest of the ABI described
 in \cref{sec:interface} has been mocked (for instance,
 calls about the configuration or the
-index of the node). The stubbed peer does not use any database of blocks since
+index of the node have been mocked). The stubbed peer does not use any database of blocks since
 it does not even keep a blockchain. Therefore, there is no block
 creation rate and the calls in \cref{fig:api} are executed immediately,
 at the maximal speed allowed by the Hotmoka application.
@@ -52,7 +52,7 @@ There is no mining nor gossiping, nor other connected peers to synchronize with.
 
       \draw[->, thick] (-4,-0.45) -- (-0.5,-0.45);
       \draw (-2.25,-0.7) node {transaction requests};
-      \draw (-2.25,-0.2) node {{\small API}};
+      \draw (-2.25,-0.2) node {{\small ABI}};
       \draw[<-, thick] (-4,0) -- (-0.5,0);
       \draw (-2.25,0.3) node {transaction responses};
       \draw [fill=verylightblue,thick] (-6,-0.6) rectangle +(2,0.8);
@@ -73,12 +73,12 @@ There is no mining nor gossiping, nor other connected peers to synchronize with.
     \end{tikzpicture}
   \end{center}
   \caption{A stubbed blockchain peer.
-    It just forwards the abstract blockchain API calls
+    It just forwards the abstract blockchain ABI calls
     from the clients to the Hotmoka application.}
   \label{fig:stubbed}
 \end{figure*}
 
-Still, the stubbed peer in \cref{fig:stubbed} has the same abstract blockchain interface
+Still, the stubbed peer in \cref{fig:stubbed} has the same ABI
 as a real peer. Therefore, testcases such as those in \cref{fig:testcases} can be run
 against it, without any modification: a switch in the test execution invocation
 provides different instantiations for the peer. This is an application of the
@@ -86,4 +86,4 @@ traditional open-closed principle of software engineering~\citep{Meyer97}.
 
 \Cref{sec:experiments} will confirm that testcases executed against a stubbed peer
 are quite fast, enough to use them as non-regression tests during continuous
-integration, for the development of the Hotmoka application.
+integration, for instance for the development of the Hotmoka application.

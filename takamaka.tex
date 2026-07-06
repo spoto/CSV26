@@ -42,7 +42,8 @@ public class Ponzi extends Contract {
 \end{figure*}
 
 Consider the Takamaka smart contract in \cref{fig:ponzi},
-translated from an equivalent Solidity smart contract by~\cite{IyerD18}. It implements a Ponzi scheme
+translated from an equivalent Solidity smart contract
+by~\cite{IyerD18}. It implements a Ponzi scheme
 that investors can join either by installing an instance of
 the contract (by calling its constructor)
 and becoming its first investor (\cref{line:add_constructor}) or,
@@ -65,8 +66,8 @@ of Java's native lists: the latter are not deterministic and therefore cannot be
 and are consequently rejected in Takamaka. Finally, note that method \texttt{receive} of
 \texttt{PayableContract} is final in Takamaka (\ie it cannot be redefined),
 which makes reentrancy impossible at \cref{line:receive} and avoids the complex use of
-Solidity's withdrawing pattern~\citep{AntonopoulosWPMP25} (compare with the Solidity
-code in~\cite{IyerD18}).
+Solidity's withdrawing pattern~\citep{AntonopoulosWPMP25}, which is needed instead
+in the Solidity code in~\cite{IyerD18}.
 
 \begin{figure*}
 \begin{lstlisting}[language=Java]
@@ -125,7 +126,7 @@ class Ponzi extends HotmokaTest {
 
 \Cref{fig:testcases} shows a JUnit class with two testcases for the smart contract
 in \cref{fig:ponzi}. This class is a client of the Hotmoka blockchain, that uses its
-abstract interface (\cref{fig:architecture})
+ABI (\cref{fig:architecture})
 to install the smart contract in \cref{fig:ponzi} and to call its constructor and method.
 Namely, in JUnit, method \texttt{beforeAll} is executed only once, before running the
 testcases of the class. In our case, it installs in blockchain the compiled Java bytecode
@@ -133,7 +134,7 @@ testcases of the class. In our case, it installs in blockchain the compiled Java
 pay for this transaction. A faucet is an account of a testnet that can be used to
 pay for transactions, \emph{for free}, which is useful during testing.
 A mainnet, of course, has no faucet account. An abstract reference to the installed
-jar is saved as \texttt{jar}. Method \texttt{beforeEach}, instead, is
+jar is later accessible as \texttt{jar}. Method \texttt{beforeEach}, instead, is
 run before \emph{each} of the testcases. It calls the inherited method \texttt{setAccounts}
 that executes transactions to create and fund three account objects, controlled by three fresh key pairs.
 That macro pays such transactions and funds from the faucet of the blockchain.
@@ -159,12 +160,12 @@ of the smart contract and lets account $1$ invest too little in it. It verifies 
 an exception is thrown, whose cause has the expected exception class and message.
 
 The testcases in \cref{fig:testcases} set a minimal gas price for the transactions that they execute,
-since they are meant to run on a testnet that is programmed to ignore gas prices. This avoids
+since they are meant to run on a testnet that is configured to ignore gas prices. This avoids
 testcase failures due to fluctuating gas prices. An alternative would be to query the current gas price of
 the blockchain and use a safe overapproximation, but we do not show it here for simplicity.
 
 If the testcases in \cref{fig:testcases} are run, they both succeed, giving confidence
 in the expected behavior of the smart contract in \cref{fig:ponzi}. From another perspective,
-they support our confidence in the correct implementation of the Hotmoka runtime
-and blockchain (the application and peer in \cref{fig:architecture}) and can be used as
-non-regression tests when the code of such runtime or blockchain must be modified.
+they support our confidence in the correct implementation of the Hotmoka application
+and peer  (\cref{fig:architecture}) and can be used as
+non-regression tests when the code of such application or peer must be modified.

@@ -1,10 +1,10 @@
 \section{Introduction}\label{sec:introduction}
 
 Smart contracts are software components that
-run inside a blockchain. Their execution
-modifies the state of the application implemented by the blockchain.
+run inside a blockchain and modify the state
+of the application implemented by the blockchain.
 For instance, Ethereum smart contracts are typically written in
-Solidity, can be installed in the state of the application and their
+Solidity, can be installed in blockchain and their
 execution modifies a key/value store, used to represent accounts, balances
 and actual data objects~\citep{AntonopoulosWPMP25}. Smart contracts
 deal with money, notarization and agreements. They are immutable after
@@ -12,7 +12,7 @@ deployment. Therefore, their correctness is important and there exist
 many techniques to increase confidence on their correctness.
 The simpler and most traditional one is testing, which consists
 in creating some executable usage scenarios for the smart contracts,
-as a sequence of transactions starting from an initial fixture.
+as a sequence of transactions that start from an initial fixture.
 Testcases test the final state of the application to verify the correct
 behavior of the smart contracts.
 
@@ -33,11 +33,12 @@ behavior of the smart contracts.
       \draw (1.5,-0.45) node {mempool};
       \draw[->, thick] (-4,-0.45) -- (0.5,-0.45);
       \draw (-2.25,-0.7) node {transaction requests};
-      \draw (-2.25,-0.2) node {{\small API}};
+      \draw (-2.25,-0.2) node {{\small ABI}};
       \draw[<-, thick] (-4,0) -- (-0.5,0);
       \draw (-2.25,0.3) node {transaction responses};
-      \draw [fill=verylightblue,thick] (-6,-0.6) rectangle +(2,0.8);
-      \draw (-5,-0.2) node {client(s)};
+      \draw [fill=verylightblue,thick] (-6.2,-0.8) rectangle +(2.2,1.2);
+      \draw (-5.1,0) node {client(s)};
+      \draw (-5.1,-0.4) node {(\eg testcases)};
 
       \draw [fill=verylightred,thick] (6,0.35) rectangle +(2,0.8);
       \draw (7.0,0.75) node {miner(s)};
@@ -62,16 +63,17 @@ behavior of the smart contracts.
     Peer, miner(s) and application are separate software
     components, possibly running in distinct machines connected
     through a network. Client(s) are external
-    software tools that connect to the peer through an API
+    software tools that connect to the peer through an
+    abstract blockchain interface (ABI)
     and run transactions to install smart contracts
-    and run their methods.}\label{fig:architecture}
+    and run their methods. Testcases are an example of clients.}\label{fig:architecture}
 \end{figure*}
 
 \Cref{fig:architecture} shows an abstract view of the architecture of
 a typical blockchain peer. The peer deals with networking and consensus.
 It communicates with one or more miners, that help the peer create new blocks,
-stored in its database of blocks. Miners receive a challenge to solve
-(for instance, the maximization of the hash of a new block) and provide
+eventually stored in its database of blocks. Miners receive a challenge to solve
+(for instance, the mimimization of the hash of a new block) and provide
 their best solution for the challenge. Peers are connected to other peers
 and gossip new blocks and new transaction requests to them.
 Clients are software
@@ -79,28 +81,31 @@ components, external to the peer, that consume the API of the peer.
 For instance, they can be wallets that require the execution of money
 transfer transactions. Or they can be DApps that require the execution
 of transactions to install and interact with smart contracts in blockchain.
+But they can also be testcases, that execute testing scenarios on the peer,
+which is the perspective taken in this article.
 Finally, the application is a software component that specifies which
 transactions are valid and which is their semantics. For instance, the Bitcoin
 application has only transactions that transform input UTXOs into ouptut
-UTXOs, while the Ethereum application has transactions that can execute
+UTXOs, while the Ethereum application has transactions that execute
 arbitrary EVM bytecode. Transaction requests are first parked inside a
-mempool, a queue from where they are eventually extracted for execution.
+mempool \ie a queue from where they are eventually extracted for execution.
 Clients may receive responses about the outcome of the
 transactions that they requested,
 in the form of actual results or events. There is an actual API
 that specifies the request/response
 programming interface for the blockchain, such as the Web3 API,
-in the case of Ethereum.
+in the case of Ethereum. We name that interface as the peer's ABI
+(abstract blockchain interface).
 
-Testcases can be seen as clients that use the blockchain API to simulate
+Testcases can be seen as clients that use the ABI to simulate
 usage scenarios for smart contracts and verify their outcome.
 In terms of \Cref{fig:architecture}, this means that testcases assume
 the blockchain peer, its miners and its application to be working correctly
 and use them as a testbench for the execution of the smart contracts, that
 are the target of the testing activity. But another perspective is possible:
 testcases can be assumed to pass and can get used as non-regression tests
-for modifications to the blockchain peer, miners or application, or for
-complete rewritings of the peer. The target of the testing activity are
+for modifications to the blockchain peer, miners or application, even for
+a complete replacement of the peer implementation. The target of the testing activity are
 peer, miners and application in this case.
 
 This article uses testcases in poth ways.
@@ -117,11 +122,11 @@ Testcases on smart contracts have been invaluable during this transition,
 to give confidence in the correctness of the new peer, despite its
 radical shift of consensus algorithm.
 
-This has been possible because the abstract API between clients and peer
+This has been possible because the ABI between clients and peer
 is the same, regardless of the implementation of the peer and of its consensus
 algorithm. The existence of this abstract interface has also allowed us
 to apply the traditional stubbing approach to it: the peer
-in \cref{fig:architecture} has been replaced with a stubbed peer that does
+in \cref{fig:architecture} has been replaced with a stubbed one that does
 not implement consensus nor gossiping, but just forwards the transaction
 requests to an actual application. The advantage is that
 testcases can be executed much faster (minutes) than against an actual peer
@@ -137,34 +142,34 @@ continuous integration as a Github action.
 The contributions of this article are the following:
 %
 \begin{itemize}
-\item the description of the abstract API between the clients and an
+\item the description of the ABI between the clients and an
   Hotmoka blockchain peer, meant to allow the execution of object-oriented
   code in blockchain;
-\item the description of how that API allows one to
+\item the description of how that single ABI allows one to
   run testcases of smart contracts
   against different implementations of the peer, with different
   consensus algorithms;
 \item a stubbed implementation of the peers, that makes the execution of the
   testcases faster and allows their use for continuous integration, but still keeps
-  their same abstract API;
+  their same ABI;
 \item an adaptor for remote peers, that allows one to execute testcases
   against a local peer as well as against a remote peer, always using the
-  same abstract API.
+  same ABI.
 \end{itemize}
-
-The use of a single API, for local, remote, actual or stubbed peers, allows one
+%
+The use of a single ABI, for local, remote, actual or stubbed peers, allows one
 to run the same testcases against all possible implementations, without modification,
 in accordance with the open-closed principle~\citep{Meyer97}.
 
 The rest of this article is organized as follows. \Cref{sec:related} reports
 related works. \Cref{sec:takamaka} presents an example of smart contract
-in the Takamaka subset of Java used by Hotmoka and of a testcase for that
-smart contract. \Cref{sec:interface} presents the API between clients
+in the Takamaka subset of Java used by Hotmoka and of two testcases for that
+smart contract. \Cref{sec:interface} presents the ABI between clients
 and Hotmoka peers. \Cref{sec:stubbing} describes the implementation
 of a stubbed Hotmoka peer.
-\Cref{sec:adapting} shows how the API between clients and peers can be adapted to
-a remote peer, potentially running in another machine and reachable thorugh
+\Cref{sec:adapting} shows how the ABI between clients and peers can be adapted to
+a remote peer, potentially running in another machine and reachable through
 network calls. \Cref{sec:experiments} reports experiments with
 the testing of Takamaka smart contracts against different implementations
-of the API, including the stubbed one, both local and remote.
+of the ABI, including the stubbed one, both local and remote.
 \Cref{sec:conclusion} concludes.

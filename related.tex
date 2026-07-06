@@ -1,22 +1,21 @@
 \section{Related Work}\label{sec:related}
 
 Most testing frameworks work for Solidity smart contracts
-for Ethereum-like blockchains, that still cover a majority of the
-running smart contracts.
+and Ethereum-like blockchains, that still cover a majority of the
+installed smart contracts.
 Pytest~\citep{pytest} is a Python test suite for Ethereum smart contracts.
-Foundry~\citep{foundry} is a Rust framework
-that includes a testing suite
-where Solidity contracts create the fixture and runs the tests.
+Foundry~\citep{foundry} is a Rust framework that includes a testing suite
+where Solidity contracts create the fixture and run the tests.
 Remix includes a similar test suite in Solidity~\citep{remixunittesting},
 integrated inside the development environment.
 Both Waffle~\citep{waffle} and Hardhat~\citep{hardhat} are TypeScript
 testing frameworks for Solidity smart contracts:
-they use the Web3 API tor install the contracts in blockchain
+they use the Web3 API to install the contracts in blockchain
 and interact with them.
-The legacy Truffle framework~\citep{truffle} is now discontinued
-and converging into Hardhat.
 They are probably the most similar approach to our use of JUnit,
 despite the different programming language.
+The legacy Truffle framework~\citep{truffle} is now discontinued
+and converging into Hardhat.
 The Ape framework is a Web3 development tool for different smart contract
 languages, including Solidity. It has its own testing
 framework~\citep{apetesting}, based on pytest.
@@ -25,22 +24,22 @@ that includes some fuzzing feature.
 
 Other blockchains, with different smart contract languages, have their own
 testing frameworks. We cannot cite them all here.
-Just for providing a few examples, there are testing frameworks
+Just to provide a few examples, there are testing frameworks
 for Solana~\citep{rapidinnovation}, Polkadot~\citep{zombienet},
 and Algorand~\citep{algokit}.
 
 Writing testcases for smart contracts is considered difficult
-since synamic sequences of behaviors are tested, rather than
+since dynamic sequences of behaviors are tested, rather than
 specific outputs. Therefore, the \emph{test oracle problem} plays
 a significant role here and it is why metamorphic testing
-(that tests consistency in the output rather than the exact output)
 is widely used for testing smart contracts~\citep{SunJZL25,VillanuevaSR25}.
+That is, tests check consistency in the output rather than the exact output.
 Moreover, testcases for smart contracts can
-sometime be generated automatically,
+sometimes be generated automatically,
 for instance for specific properties such as gas consumption
 bounds~\citep{AlbertDDFG26} or with the support of large language models
 and retrieval augmented generation~\citep{SbouiL26}.
-Fuzzing has also been used to generate or strengthen testcases for
+Fuzzing has also been used to generate and strengthen testcases for
 smart contracts~\cite{LahamiKMMR24,WongZNLCYLLW24}.
 
 Testcases can be tested themselves, in order to evaluate their
