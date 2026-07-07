@@ -15,12 +15,13 @@ the experiments in this section by following the instructions at
 \url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/README.md}.
 We have run the testcases on an Intel Core i3-10110U\ $\times$\ 4
 Linux Ubuntu 26.04 machine
-with $16$ gigabytes of RAM. However, the specific configuration of the testing machine
+with $16$ gigabytes of RAM, both for local and remote peers.
+However, the specific configuration of the testing machine
 is largely irrelevant, since these tests use almost no RAM and their speed depends on the
 block creation rate of the blockchain, not on the speed of the processor,
 except for the experiments with the stubbed peers.
 
-\begin{figure*}
+\begin{table*}
   \begin{center}
   \begin{tabular}{|c|c|c|c||r|r|r|}
     \hline
@@ -51,11 +52,11 @@ except for the experiments with the stubbed peers.
     but just consume ABI requests; therefore, for them,
     \textbf{\#peers} can only be $1$ and \textbf{rate} has no meaning.
   }
-  \label{fig:experiments}
+  \label{tab:experiments}
   \end{center}
-\end{figure*}
+\end{table*}
 
-\Cref{fig:experiments} shows the results of the testcases, executed against
+\Cref{tab:experiments} shows the results of the testcases, executed against
 different implementations of the peers of the testing blockchain. For instance, the first row shows
 that the execution of the testcases against a local peer of a blockchain consisting of
 that peer only, built over the Tendermint consensus engine, creating a block every $4000$
@@ -67,7 +68,7 @@ All tests succeed, also in this case. The third row runs the tests in the same
 configuration as above, but against a remote peer.
 The execution takes some minutes more, because of network delays, and all tests succeed.
 
-The subsequent three rows in \cref{fig:experiments} run the testcases
+The subsequent three rows in \cref{tab:experiments} run the testcases
 against peers implemented over the Mokamint proof of space consensus engine.
 The blockchain is first made of a single peer creating a block very $4000$
 milliseconds, on average. Then it is made of four peers,
@@ -81,7 +82,7 @@ of a testcase means that objects might ``disappear'' or change address or state,
 the testcase fail. Namely, the number of failing testcases is not constantly $67$,
 but we have verified that it varies in different executions of the testcases, randomly.
 
-Finally, the last two rows of \cref{fig:experiments} show experiments with a stubbed
+Finally, the last two rows of \cref{tab:experiments} show experiments with a stubbed
 peer, first local then remote. Stubbed peers do not keep any blockchain, therefore
 there is no block creation rate for them. All tests succeed. The important aspect here is
 that the execution time this time is very small, just a few minutes, which makes

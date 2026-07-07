@@ -23,9 +23,9 @@ However, a single ABI could be used also for other blockchains, such as Web3 for
 
 A limit of testing for smart contracts is that the blockchain used for
 testing must have deterministic finality, since otherwise there might be
-history changes that make some tests fail (\cref{fig:experiments}).
+history changes that make some tests fail (\cref{tab:experiments}).
 This is a general result, not related to the use of a single ABI.
 A possible solution is to introduce a delay between transaction requests,
 in order to give the blockchain the time to stabilize. But this would
 further increase the time for executing the testcases, that is already significant
-for non-stubbed peer implementations (\cref{fig:experiments}).
+for non-stubbed peer implementations (\cref{tab:experiments}).
