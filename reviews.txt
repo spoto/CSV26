@@ -1,0 +1,26 @@
+The work is good and the topic is relevant. Below are some comments that, once addressed, in this reviewer opinion, would make the paper stronger.
+
+Running the same tests against a local simulated chain, a fork or a remote network is already common in smart contract tooling, for instance this is the case with Hardhat Network or Anvil. This paper's setting seems different in an interesting way: the same suite runs against the production peer with different consensus engines, so it can act as a regression suite for the peer itself. I would encourage the authors to make this distinction explicit. A short comparison along these lines could replace the list of frameworks in Section 2 and the sentence "We cannot cite them all here".
+
+The paper states that the tests were invaluable during the move from Tendermint to Mokamint, but does not show it. All tests passing on every configuration shows that the implementations are compatible with respect to the suite. It does not yet show that the suite would detect faults in the peer or the application. Some evidence would strengthen the paper considerably, for example: coverage of the peer and application modules; a small fault injection experiment; examples of regressions caught during the migration.
+
+Regarding the experiments:
+- Table 1 reports a single time per configuration. Repeated runs with some measure of spread would make the comparison more reliable.
+- For the Mokamint network with four peers, it would be useful to know how the number of failures varies and which tests fail.
+- The configurations, in my opinion, are not fully comparable. For example, Tendermint remote uses four peers at 3000 ms, while Mokamint remote uses one peer at 4000 ms. The Mokamint run with four peers at 3000 ms takes longer than the run with one peer at 4000 ms, which deserves a short explanation.
+- A brief discussion of threats to validity would help. It could cover how the stubbed peer simulates time and blocks compared with real peers, the fact that the test networks ignore gas prices, and the time dependent tests that can be disabled with the onlyTimeIndependentTests property.
+- The observation in Section 8 about deterministic finality comes from one engine, and might be presented as such rather than as a general result.
+
+About reproducibility and clarity:
+- The link to the master branch and the source code reference dated 2022 should be replaced by a tagged release or archived snapshot. The authors should also give file paths for the classes named in the text and the JDK, Maven and Tendermint versions used.
+- It would help to show how the test harness selects the implementation (the nodeType property in HotmokaTest), since this is what makes the tests reusable.
+- A short summary of the Takamaka features used in the examples would let the paper be read on its own.
+
+Minor miscellaneous comments:
+- The code in Figs. 2 to 4 would be better presented as listings.
+- The test class in Fig. 3 has the same name as the contract. Calling it PonziTest would be clearer.
+- Section 3: lists such as ArrayList iterate deterministically. Please clarify in what sense Java lists are considered non deterministic.
+- Section 6: the authors might consider whether the remote peer is better described as a remote proxy than as an adapter.
+- Section 7 refers to "all configurations in Fig. 3", which should be Table 1?
+- In the tests README, the command for the local stub lacks the test goal.
+- There are some typos throughout the manuscript, a quick proofreading is recommended

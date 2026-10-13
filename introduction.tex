@@ -97,18 +97,25 @@ programming interface for the blockchain, such as the Web3 API,
 in the case of Ethereum. We name that interface as the peer's ABI
 (abstract blockchain interface).
 
-Testcases can be seen as clients that use the ABI to simulate
+Testcases are clients that consume the ABI to simulate
 usage scenarios for smart contracts and verify their outcome.
-In terms of \Cref{fig:architecture}, this means that testcases assume
-the blockchain peer, its miners and its application to be working correctly
-and use them as a testbench for the execution of the smart contracts, that
-are the target of the testing activity. But another perspective is possible:
-testcases can be assumed to pass and can get used as non-regression tests
+Two perspectives can be taken about what is being tested.
+The first one is that the target of the testing activity are
+peer, miners and application.
+In this cases, testcases can get used as non-regression tests
 for modifications to the blockchain peer, miners or application, even for
-a complete replacement of the peer implementation. The target of the testing activity are
-peer, miners and application in this case.
+a complete replacement of the peer implementation. This use of
+testcases has not been discussed erlier, in the context of blockchain
+technology, and is the main reason of this paper.
+A second perspective assumes instead that
+the blockchain peer, its miners and its application are working correctly
+and uses them as a testbench for the execution of the smart contracts, that
+are the target of the testing activity, in this case. This perspective
+is more traditional, and there are already many frameworks for testing smart
+contracts (see \cref{sec:related}).
 
-This article uses testcases in poth ways.
+This article uses testcases in both ways, but the main interest
+stems from the first usage of testcases.
 It originated during the development of Hotmoka~\citep{hotmoka},
 a new, permissionless, public blockchain based on Solidity-like
 smart contracts written in a subset of Java called Takamaka~\citep{Spoto19}.
@@ -147,8 +154,10 @@ The contributions of this article are the following:
   code in blockchain;
 \item the description of how that single ABI allows one to
   run testcases of smart contracts
-  against different implementations of the peer, with different
-  consensus algorithms;
+  against different implementations of the peer, even with different
+  consensus algorithms; therefore, testcsaes become
+  a non-regression check
+  during the development of peer, miners and application;
 \item a stubbed implementation of the peers, that makes the execution of the
   testcases faster and allows their use for continuous integration, but still keeps
   their same ABI;
