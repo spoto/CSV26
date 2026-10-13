@@ -43,7 +43,7 @@ as non-regression tests of peer, miners and application has not been
 presented up to now. Instead, many testing frameworks exist, taking
 the smart contracts as the target of the verification process."
 
-and we have removed the comment "We cannot cite them all here."
+We have removed the comment "We cannot cite them all here."
 
 END
 
@@ -63,9 +63,36 @@ About reproducibility and clarity:
 
 Minor miscellaneous comments:
 - The code in Figs. 2 to 4 would be better presented as listings.
-- The test class in Fig. 3 has the same name as the contract. Calling it PonziTest would be clearer.
+REPLY
+The journal requires the svjour3 Latex style, that supports floats for figures and tables, but not for listings.
+END
+- The test class in Fig. 3 has the same name as the contract. Calling it PonziTest would be clearer. RENAMED INTO PonziTests
 - Section 3: lists such as ArrayList iterate deterministically. Please clarify in what sense Java lists are considered non deterministic.
+REPLY
+The reviewer is right. The actual issue with Java lists used as state variable is another and we clarify it now a follows:
+"StorageLists are a persistent replacement
+of Java's native lists: modifications to such lists get persistent in the
+state database (storage)
+and do not disappear at the end of a transaction. All state
+variables must be persistent in Takamaka, and this is statically verified
+when the jar of a smart contract is installed in blockchain,
+or otherwise the jar gets rejected."
+END
 - Section 6: the authors might consider whether the remote peer is better described as a remote proxy than as an adapter.
-- Section 7 refers to "all configurations in Fig. 3", which should be Table 1?
-- In the tests README, the command for the local stub lacks the test goal.
-- There are some typos throughout the manuscript, a quick proofreading is recommended
+REPLY
+The distinction between different design patterns is sometimes vague. We looked at some discussion online:
+https://stackoverflow.com/questions/37692814/what-is-the-exact-difference-between-adapter-and-proxy-patterns
+https://stackoverflow.com/questions/350404/how-do-the-proxy-decorator-adapter-and-bridge-patterns-differ
+https://en.wikipedia.org/wiki/Proxy_pattern
+Our understanding is that the proxy pattern should keep the same interface, while the adapter pattern
+does adapt an interface to another. See for instance in the Wikipedia citation:
+"For the client, usage of a proxy object is similar to using the real object, because both implement the same interface".
+In our case, we are adapting a web service to the ABI and their interfaces
+are definitely different. So the service and the remote are adapters while service+remote is a proxy pattern.
+We clarify this now as follows now in the paper:
+"The compound use of a service and a remote adapter (Fig 6c) can also
+be seen as an instance of the proxy design pattern."
+END
+- Section 7 refers to "all configurations in Fig. 3", which should be Table 1? YES, FIXED
+- In the tests README, the command for the local stub lacks the test goal. FIXED
+- There are some typos throughout the manuscript, a quick proofreading is recommended. WE HAVE RUN THE DOCUMENT THROUGH A SYNTAX CHECKER AND CORRECTED SOME TYPOS

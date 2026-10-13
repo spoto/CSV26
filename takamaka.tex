@@ -61,9 +61,14 @@ persisted state of the object (\cref{line:investors}) and must be able to receiv
 split fees whenever a new investor arrives (\cref{line:receive}). Accounts
 are a subclass of \texttt{PayableContract} in Takamaka, controlled through a key pair,
 hence accounts can call both the constructor and \texttt{invest} in \cref{fig:ponzi}.
-\texttt{StorageList}s (\cref{line:investors}) are a deterministic replacement
-of Java's native lists: the latter are not deterministic and therefore cannot be used in blockchain
-and are consequently rejected in Takamaka. Finally, note that method \texttt{receive} of
+\texttt{StorageList}s (\cref{line:investors}) are a persistent replacement
+of Java's native lists: modifications to such lists get persistent in the
+state database (\emph{storage})
+and do not disappear at the end of a transaction. All state
+variables must be persistent in Takamaka, and this is statically verified
+when the jar of a smart contract is installed in blockchain,
+or otherwise the jar gets rejected.
+Finally, note that method \texttt{receive} of
 \texttt{PayableContract} is final in Takamaka (\ie it cannot be redefined),
 which makes reentrancy impossible at \cref{line:receive} and avoids the complex use of
 Solidity's withdrawing pattern~\citep{AntonopoulosWPMP25}, which is needed instead
@@ -71,7 +76,7 @@ in the Solidity code in~\cite{IyerD18}.
 
 \begin{figure*}
 \begin{lstlisting}[language=Java]
-class Ponzi extends HotmokaTest {
+class PonziTests extends HotmokaTest {
  var PONZI = classNamed("io.hotmoka.examples.ponzi.Ponzi");
  var PONZI_CONSTR = ConstructorSignatures.of(PONZI);
  var INVEST = MethodSignatures.of(PONZI, "invest", LONG);
