@@ -57,7 +57,8 @@ the peer is presented through its \texttt{io.hotmoka.node.api.Node} interface.
 Furthermore, if a remote node is required,
 the \texttt{mkRemoteNode} method adapts that interface first to a service and then to a remote
 to such a service (\cref{fig:remote_peer}). In all cases,
-the same \texttt{io.hotmoka.node.api.Node} interface is available to communicate to the blockchain peer.
+the same \texttt{io.hotmoka.node.api.Node} interface is available to interact with the blockchain peer
+and testcases are programmed against that interface.
 
 \begin{table*}
   \begin{center}
@@ -69,7 +70,7 @@ the same \texttt{io.hotmoka.node.api.Node} interface is available to communicate
     Tendermint & remote & 4 & 3000 & 422 & 0 & 2h49m07s\\\hline
     Mokamint & local & 1 & 4000 & 422 & 0 & 3h05m01s\\\hline
     Mokamint & local & 4 & 3000 & 355 & \textbf{67} & 3h16m06s\\\hline
-    Mokamint & remote & 1 & 4000 & 422 & 0 & 3h21m13s\\\hline
+    Mokamint & remote & 1 & 3000 & 422 & 0 & 2h41m11s\\\hline
     stubbed & local & 1 & - & 422 & 0 & 2m42s\\\hline
     stubbed & remote & 1 & - & 422 & 0 & 3m21s\\\hline
   \end{tabular}
@@ -111,7 +112,7 @@ against peers implemented over the Mokamint proof of space consensus engine.
 The blockchain is first made of a single peer creating a block very $4000$
 milliseconds, on average. Then it is made of four peers,
 creating a block every $3000$ milliseconds. Finally, it is made of a single remote peer,
-creating a block every $4000$ milliseconds and contacted through a network. The
+creating a block every $3000$ milliseconds and contacted through a network. The
 interesting point, here, is that a Mokamint blockchain of more than one peer makes
 some testcases fail ($67$ in our execution). This is because Mokamint has probabilistic
 finality, like Bitcoin and like the first Ethereum, therefore the history of the
@@ -119,6 +120,13 @@ blockchain might change, until it finally stabilizes. Changes of history in the 
 of a testcase means that objects might ``disappear'' or change address or state, which makes
 the testcase fail. Namely, the number of failing testcases is not constantly $67$,
 but we have verified that it varies in different executions of the testcases, randomly.
+Moreover, it is interesting to observe that the total time of the run with $67$ failing tests
+and creating a block every $3000$ milliseconds is larger than that of the same Mokamint tool
+with a single peer and creating a block every $4000$ seconds. This happens because some testcases
+are programmed to wait for an expected event, for instance, for a variable to reach an expected value.
+But that does not occur because of probabilistic finality, which makes some transaction fail.
+As a consequence, such testcases hang for some time, until they are terminated
+by a timeout mechanism.
 
 Finally, the last two rows of \cref{tab:experiments} show experiments with a stubbed
 peer, first local then remote. Stubbed peers do not keep any blockchain, therefore

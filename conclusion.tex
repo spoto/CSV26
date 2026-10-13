@@ -21,10 +21,9 @@ This article focused on the Hotmoka blockchain and on Takamaka smart contracts,
 since it originated during the development of the latter blockchain.
 However, a single ABI could be used also for other blockchains, such as Web3 for Ethereum.
 
-A limit of testing for smart contracts is that the blockchain used for
-testing must have deterministic finality, since otherwise there might be
-history changes that make some tests fail (\cref{tab:experiments}).
-This is a general result, not related to the use of a single ABI.
+A limit of testing for smart contracts is related to a tool such as Mokamint,
+whose probabilistic finality introduces the possibility of
+history changes that make some tests randomly fail (\cref{tab:experiments}).
 A possible solution is to introduce a delay between transaction requests,
 in order to give the blockchain the time to stabilize. But this would
 further increase the time for executing the testcases, that is already significant
