@@ -57,9 +57,51 @@ Regarding the experiments:
 - The observation in Section 8 about deterministic finality comes from one engine, and might be presented as such rather than as a general result.
 
 About reproducibility and clarity:
-- The link to the master branch and the source code reference dated 2022 should be replaced by a tagged release or archived snapshot. The authors should also give file paths for the classes named in the text and the JDK, Maven and Tendermint versions used.
+- The link to the master branch and the source code reference dated 2022 should be replaced by a tagged release or archived snapshot
+REPLY
+We have created the release 1.12.5 of Hotmoka and referred to the tag v1.12.5 for the exact configuration as in the paper
+END
+
+The authors should also give file paths for the classes named in the text
+REPLY
+Added file paths for all classes named in the text, in footnotes.
+END
+
+and the JDK, Maven and Tendermint versions used.
+REPLY
+We have added JDK, Maven and Tendermint versions.
+END
+
 - It would help to show how the test harness selects the implementation (the nodeType property in HotmokaTest), since this is what makes the tests reusable.
+REPLY
+We have added a snippet from that harness, which is now Figure 7. We have expanded the description as follows, in Sec. 7:
+
+"The \texttt{HotmokaTest} superclass of all tests (\cref{fig:testcases})
+initializes the blockchain for
+testing, only once, before running all tests, as part of its \texttt{@BeforeAll} fixture.
+It uses an environment variable \texttt{nodeType}
+to communicate the kind of blockchain peer(s) that must be created.
+Inside \texttt{HotmokaTest}, that variable is accessed and used to decide which
+peer(s) must be created. \Cref{fig:nodeType} shows how this is performed. Methods
+\texttt{mkTendermintNetwork} and \texttt{mkMokamintNetwork} create a blockchain whose peers
+use Tendermint or Mokamint, respectively. The number of peers is also provided as an environment
+variables to the tests: if $n\ge 1$ peers are required, then those methods return
+the first of a network of a fully connected network of $n$ peers.
+Method \texttt{mkStubbedNode} creates, instead, a single stubbed node, and
+is used as default. In all three cases,
+the peer is presented through its \texttt{io.hotmoka.node.api.Node} interface.
+Furthermore, if a remote node is required,
+the \texttt{mkRemoteNode} method adapts that interface first to a service and then to a remote
+to such a service (\cref{fig:remote_peer}). In all cases,
+the same \texttt{io.hotmoka.node.api.Node} interface is available to communicate to the blockchain peer.
+"
+END
 - A short summary of the Takamaka features used in the examples would let the paper be read on its own.
+REPLY
+Such a summary was meant to be the first paragraph of Sec. 3. We have expanded that paragraph now, in particular
+with the description of the storage classes for smart contracts' state, which is relevant to understand
+why we are using a StorageList in the example.
+END
 
 Minor miscellaneous comments:
 - The code in Figs. 2 to 4 would be better presented as listings.

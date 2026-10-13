@@ -13,13 +13,51 @@ Such testcases can be found inside the \texttt{io-hotmoka-tests} module
 of Hotmoka~\citep{hotmokacode}. The interested reader can reproduce
 the experiments in this section by following the instructions at
 \url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/README.md}.
+The Git tag of the repository used for the experiments is \texttt{v1.12.5}.
+
 We have run the testcases on an Intel Core i3-10110U\ $\times$\ 4
 Linux Ubuntu 26.04 machine
 with $16$ gigabytes of RAM, both for local and remote peers.
-However, the specific configuration of the testing machine
+We ave used OpenJDK 25.0.4.1, Maven 3.9.12 and Tendermint 0.34.15.
+Note, however, that the specific configuration of the testing machine
 is largely irrelevant, since these tests use almost no RAM and their speed depends on the
-block creation rate of the blockchain, not on the speed of the processor,
+block creation rate of the blockchain, not on the speed of the processor or Java interpreter,
 except for the experiments with the stubbed peers.
+
+\begin{figure*}
+  \begin{lstlisting}[language=Java,numbers=left]
+Node node = switch (getNodeType()) {
+  case "tendermint": yield mkTendermintNetwork();
+  case "tendermint-remote": yield mkRemoteNode(mkTendermintNetwork());
+  case "mokamint": yield mkMokamintNetwork();
+  case "mokamint-remote": yield mkRemoteNode(mkMokamintNetwork());
+  case "stubbed":
+  default: yield mkStubbedNode();
+  case "stubbed-remote": yield mkRemoteNode(mkStubbedNode());
+};
+  \end{lstlisting}
+  \caption{The creation of the peer(s) for testing, depending on the node type specified from command line as an environment variable \texttt{nodeType}.}
+  \label{fig:nodeType}
+\end{figure*}
+
+The \texttt{HotmokaTest} superclass of all tests (\cref{fig:testcases})
+initializes the blockchain for
+testing, only once, before running all tests, as part of its \texttt{@BeforeAll} fixture.
+It uses an environment variable \texttt{nodeType}
+to communicate the kind of blockchain peer(s) that must be created.
+Inside \texttt{HotmokaTest}, that variable is accessed and used to decide which
+peer(s) must be created. \Cref{fig:nodeType} shows how this is performed. Methods
+\texttt{mkTendermintNetwork} and \texttt{mkMokamintNetwork} create a blockchain whose peers
+use Tendermint or Mokamint, respectively. The number of peers is also provided as an environment
+variables to the tests: if $n\ge 1$ peers are required, then those methods return
+the first of a network of a fully connected network of $n$ peers.
+Method \texttt{mkStubbedNode} creates, instead, a single stubbed node, and
+is used as default. In all three cases,
+the peer is presented through its \texttt{io.hotmoka.node.api.Node} interface.
+Furthermore, if a remote node is required,
+the \texttt{mkRemoteNode} method adapts that interface first to a service and then to a remote
+to such a service (\cref{fig:remote_peer}). In all cases,
+the same \texttt{io.hotmoka.node.api.Node} interface is available to communicate to the blockchain peer.
 
 \begin{table*}
   \begin{center}

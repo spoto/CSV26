@@ -34,7 +34,7 @@ in \cref{fig:testcases}, the jar containing the compiled Java bytecode of the co
 \cref{fig:ponzi} is installed in blockchain at a reference that is saved as \texttt{jar}.
 The faucet account of the testnet is used to pay for the installation. The runtime of Takamaka
 is used as classpath, so that for instance the library classes \texttt{Contract} and
-\texttt{StorageLinkedList} used in \cref{fig:ponzi} get correctly resolved.
+\texttt{StorageLinkedList}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/main/io-takamaka-code/src/main/java/io/takamaka/code/util/StorageLinkedList.java}} used in \cref{fig:ponzi} get correctly resolved.
 
 Method \texttt{callConstructor} calls a constructor of a class and yields the
 machine-independent \texttt{reference} to where the resulting object
@@ -67,13 +67,13 @@ For instance, \texttt{runMethod} is used in the implementation of \texttt{getBal
 (not shown), to call the side-effect-free \texttt{balance} method of a contract.
 
 The ABI in \cref{fig:api} has been explicitly simplified. The interested reader will find
-the actual, complete ABI as interface \texttt{io.hotmoka.node.api.Node} in~\cite{hotmokacode}.
+the actual, complete ABI as interface \texttt{io.hotmoka.node.api.Node}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-node-api/src/main/java/io/hotmoka/node/api/Node.java}} in~\cite{hotmokacode}.
 The latter has additional methods for calling Java static methods (that do not have a \texttt{receiver}),
 for accessing the current state of an object, its index (history),
 the manifest and the configuration of the blockchain and the set of responses/requests executed so far.
 Moreover, paid methods (as the first three in \cref{fig:api}) require a \emph{nonce} to avoid
 request replaying (as in Solidity). We do not show this here for simplicity. In practice, such nonces are automatically
-computed by the superclass \texttt{HotmokaTest} in \cref{fig:testcases}. Finally, the ABI in
+computed by the superclass \texttt{HotmokaTest}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/HotmokaTest.java}} in \cref{fig:testcases}. Finally, the ABI in
 \cref{fig:api} is synchronous, while the actual ABI has also asynchronous versions of the first three
 methods in \cref{fig:api}, that do not yield a reference or result but a future to them. Asynchronicity
 allows one sometimes to write faster testcases, when the outcome of a transaction needn't be committed before

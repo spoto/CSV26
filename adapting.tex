@@ -63,8 +63,8 @@ The testcases in \cref{sec:takamaka} can be run as clients against a peer, creat
 as a Java object in the same JVM where the testcases are executed
 (\cref{fig:local_peer}). In this case, the testcases can execute the ABI
 calls in \cref{fig:api} directly. However, another, more realistic, scenario is that
-of a peer running in a different machine, adapted and published as a web service,
-that can be used by clients through network calls corresponding to
+of a peer running in a different machine, adapted and published as a web service\footnote{See its implementation at \url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-node-service/src/main/java/io/hotmoka/node/service/internal/NodeServiceImpl.java}.}.
+That web service can be used by clients through network calls corresponding to
 the method calls in \cref{fig:api}, whose arguments and results
 are represented in JSON format (\cref{fig:web_peer}). This scenario
 is an instance of the adapter design pattern~\citep{GammaHJV95} and requires to
@@ -81,7 +81,7 @@ In order to avoid this software engineering problem, we have adapted
 network-reachable peers back to the ABI in \cref{fig:api}, again through the adapter
 design pattern. This is shown in \cref{fig:remote_peer}. A remote peer
 is a Java object that implements the ABI in \cref{fig:api} and adapts
-its methods to network calls over JSON-represented arguments, and back.
+its methods to network calls over JSON-represented arguments, and back\footnote{See its implementation at \url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-node-remote/src/main/java/io/hotmoka/node/remote/internal/RemoteNodeImpl.java}.}.
 A remote peer implements the same ABI as a local peer, therefore the testcases
 in \cref{fig:testcases} needn't be modified to run against a remote peer.
 The compound use of a service and a remote adapter (\cref{fig:remote_peer}) can also
