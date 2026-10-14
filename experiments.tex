@@ -65,18 +65,20 @@ and testcases are programmed against that interface.
   \begin{tabular}{|c|c|c|c||r|r|r|}
     \hline
     \textbf{implementation} & \textbf{locality} & \textbf{\#peers} & \textbf{rate} & \textbf{successes} & \textbf{failures} & \textbf{time}\\\hline\hline
-    Tendermint & local & 1 & 4000 & 422 & 0 & 3h03m55s\\\hline
-    Tendermint & local & 4 & 3000 & 422 & 0 & 2h35m11s\\\hline
-    Tendermint & remote & 4 & 3000 & 422 & 0 & 2h49m07s\\\hline
-    Mokamint & local & 1 & 4000 & 422 & 0 & 3h05m01s\\\hline
-    Mokamint & local & 4 & 3000 & 355 & \textbf{67} & 3h16m06s\\\hline
-    Mokamint & remote & 1 & 3000 & 422 & 0 & 2h41m11s\\\hline
-    stubbed & local & 1 & - & 422 & 0 & 2m42s\\\hline
-    stubbed & remote & 1 & - & 422 & 0 & 3m21s\\\hline
+    Tendermint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h03m55s\\\hline
+    Tendermint & local & 4 & 3000 & 422/422/422 & 0/0/0 & 2h35m11s\\\hline
+    Tendermint & remote & 4 & 3000 & 422/422/422 & 0/0/0 & 2h49m07s\\\hline
+    Mokamint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h05m01s\\\hline
+    Mokamint & local & 4 & 3000 & 355/309/369 & \textbf{67}/\textbf{113}/\textbf{53} & 3h16m06s/2h11m06s/3h22m05s\\\hline
+    Mokamint & remote & 1 & 3000 & 422/422/422 & 0/0/0 & 2h41m11s\\\hline
+    stubbed & local & 1 & - & 422/422/422 & 0/0/0 & 2m42s/2m40s/2m39s\\\hline
+    stubbed & remote & 1 & - & 422/422/422 & 0/0/0 & 3m21s/3m23s/3m21s\\\hline
   \end{tabular}
   \caption{Experiments with the execution of the testcases shipped with the
     source code of Hotmoka, by using varying implementations and configurations for the
-    peers of the testing blockchain; \textbf{implementation} is the specific implementation
+    peers of the testing blockchain; for each of them, the execution is repeated three times,
+    to identify the variance in the results and execution time;
+    \textbf{implementation} is the specific implementation
     used for the ABI in \cref{sec:interface};
     \textbf{locality} distinguishes experiments against a \emph{local} peer
     (\cref{fig:local_peer}) from experiments against a \emph{remote} peer
@@ -96,7 +98,11 @@ and testcases are programmed against that interface.
 \end{table*}
 
 \Cref{tab:experiments} shows the results of the testcases, executed against
-different implementations of the peers of the testing blockchain. For instance, the first row shows
+different implementations of the peers of the testing blockchain.
+For each configuration, we have run the tests three times, in order to
+identify potential variance in the results and execution time.
+
+The first row in \cref{tab:experiments} shows
 that the execution of the testcases against a local peer of a blockchain consisting of
 that peer only, built over the Tendermint consensus engine, creating a block every $4000$
 milliseconds, takes around three hours. All testcases succeed. The second row shows
@@ -109,24 +115,42 @@ The execution takes some minutes more, because of network delays, and all tests 
 
 The subsequent three rows in \cref{tab:experiments} run the testcases
 against peers implemented over the Mokamint proof of space consensus engine.
-The blockchain is first made of a single peer creating a block very $4000$
+The blockchain is first made of a single peer creating a block every $4000$
 milliseconds, on average. Then it is made of four peers,
 creating a block every $3000$ milliseconds. Finally, it is made of a single remote peer,
 creating a block every $3000$ milliseconds and contacted through a network. The
 interesting point, here, is that a Mokamint blockchain of more than one peer makes
-some testcases fail ($67$ in our execution). This is because Mokamint has probabilistic
+some testcases fail (from $53$ to $113$ in our executions). This is because Mokamint has probabilistic
 finality, like Bitcoin and like the first Ethereum, therefore the history of the
 blockchain might change, until it finally stabilizes. Changes of history in the middle
-of a testcase means that objects might ``disappear'' or change address or state, which makes
-the testcase fail. Namely, the number of failing testcases is not constantly $67$,
-but we have verified that it varies in different executions of the testcases, randomly.
-Moreover, it is interesting to observe that the total time of the run with $67$ failing tests
-and creating a block every $3000$ milliseconds is larger than that of the same Mokamint tool
-with a single peer and creating a block every $4000$ seconds. This happens because some testcases
-are programmed to wait for an expected event, for instance, for a variable to reach an expected value.
-But that does not occur because of probabilistic finality, which makes some transaction fail.
-As a consequence, such testcases hang for some time, until they are terminated
-by a timeout mechanism.
+of a testcase means that objects might \emph{disappear} or change address or state, which makes
+the testcase fail. In our experiments,
+almost all failures are due to an incorrect nonce in the transaction requests,
+that do not match the current nonce in the target contract. This happens if the last transaction
+request over that contract gets undone by a history change.
+There is no special kind of testcases that fails. Instead, a testcase
+is more likely to fail if it performs more transactions and therefore the probability
+that at least one of them fails increases proportionally.
+Another example of failure occurred in the \texttt{Bombing}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/Bombing.java}} testcase.
+That testcase creates $500$ accounts, each funded with $500000$ coins. Therefore, the total funds in the
+accounts is $500\cdot 500000$, that is, $250000000$. The testcase then executes
+$1000$ random transfers between random accounts, with zero fees. At the end, it sums
+the balances of the $500$ accounts and checks that it is still equal to $250000000$.
+With Mokamint and four peers, this test sometimes fails with a message like
+\texttt{expected: <250000000> but was: <249999996>}. This happens because of a history change
+occurred during the access and computation of the sum of the balances of the $500$ accounts.
+
+It is interesting to observe that the total execution time with failing tests
+is rather variable: it can be longer as well as shorter than the time of the same testing configuration
+with a single peer. In particular, if the failed transaction occurs during the
+execution of the fixture of a testcase (that is, inside its \texttt{@BeforeAll} method) then
+no testcase in the same file gets executed, the running time consequently
+decreases and such non-executed testcases
+are counted as failed in \cref{tab:experiments}. But it can also be the case that a testcase
+was programmed to wait for an expected event, for instance, for a variable to reach an expected value,
+which never occurs because some transaction fails.
+As a consequence, such a testcase hangs for some time, until it gets terminated by a timeout.
+In this case, the testcase runs longer.
 
 Finally, the last two rows of \cref{tab:experiments} show experiments with a stubbed
 peer, first local then remote. Stubbed peers do not keep any blockchain, therefore
@@ -138,3 +162,14 @@ is that used in the Github action triggered at every commit on the Hotmoka repos
 It is important to recall that the same testcases, unchanged, are used for all
 configurations in \cref{tab:experiments}. This is a significant engineering simplification
 and follows from the use of the same ABI for all configurations of the peer.
+Therefore, \cref{tab:experiments} shows that the same ABI can actually be used to run all tests
+against different configurations and implementations of the blockchain. Still, there are threats to validity
+that must be reported. First of all, some testcases depend on exact timings, such as
+\texttt{BlindAuction}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/BlindAuction.java}}. Such testcases are programmed to adapt their timings to the block creation rate
+of the blockchain, but this means that they do not execute identically on different configurations.
+It is possible to disable them with an environment variable, but they have been all included
+in the experiments reported in \cref{tab:experiments}. Another threat is related to the use of a stubbed
+implementation, such as in the last two lines of \cref{tab:experiments}. That implementation lacks the
+consensus and networking layers of a real blockchain, hence it is not covering the same amount of code
+as a fully-fledged blockchain implementation. Finally, testcases ignore gas fees, differently from
+the execution of the same transactions against a real blockchain.
