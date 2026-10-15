@@ -17,8 +17,8 @@ The Git tag of the repository used for the experiments is \texttt{v1.12.5}.
 
 We have run the testcases on an Intel Core i3-10110U\ $\times$\ 4
 Linux Ubuntu 26.04 machine
-with $16$ gigabytes of RAM, both for local and remote peers.
-We ave used OpenJDK 25.0.4.1, Maven 3.9.12 and Tendermint 0.34.15.
+with $16$ gigabytes of RAM, both for local and remote peers,
+using OpenJDK 25.0.4.1, Maven 3.9.12 and Tendermint 0.34.15.
 Note, however, that the specific configuration of the testing machine
 is largely irrelevant, since these tests use almost no RAM and their speed depends on the
 block creation rate of the blockchain, not on the speed of the processor or Java interpreter,
@@ -62,17 +62,19 @@ and testcases are programmed against that interface.
 
 \begin{table*}
   \begin{center}
-  \begin{tabular}{|c|c|c|c||r|r|r|}
+  \begin{tabular}{|c|c|c|c||c|c|c|}
     \hline
     \textbf{implementation} & \textbf{locality} & \textbf{\#peers} & \textbf{rate} & \textbf{successes} & \textbf{failures} & \textbf{time}\\\hline\hline
     Tendermint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h03m55s\\\hline
+    Tendermint$^*$ & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h03m55s\\\hline
     Tendermint & local & 4 & 3000 & 422/422/422 & 0/0/0 & 2h35m11s\\\hline
     Tendermint & remote & 4 & 3000 & 422/422/422 & 0/0/0 & 2h49m07s\\\hline
-    Mokamint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h05m01s\\\hline
-    Mokamint & local & 4 & 3000 & 355/309/369 & \textbf{67}/\textbf{113}/\textbf{53} & 3h16m06s/2h11m06s/3h22m05s\\\hline
-    Mokamint & remote & 1 & 3000 & 422/422/422 & 0/0/0 & 2h41m11s\\\hline
-    stubbed & local & 1 & - & 422/422/422 & 0/0/0 & 2m42s/2m40s/2m39s\\\hline
-    stubbed & remote & 1 & - & 422/422/422 & 0/0/0 & 3m21s/3m23s/3m21s\\\hline
+    Mokamint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h05m01s/3h07m22s/3h05m06s\\\hline % OK
+    Mokamint$^*$ & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h05m01s/3h07m22s/3h05m06s\\\hline
+    Mokamint & local & 4 & 3000 & 355/309/369 & \textbf{67}/\textbf{113}/\textbf{53} & 3h16m06s/2h11m06s/3h22m05s\\\hline % OK
+    Mokamint & remote & 1 & 3000 & 422/422/422 & 0/0/0 & 3h20m09s/3h17m15s/3h18m03s\\\hline % OK
+    stubbed & local & 1 & - & 422/422/422 & 0/0/0 & 2m42s/2m40s/2m39s\\\hline % OK
+    stubbed & remote & 1 & - & 422/422/422 & 0/0/0 & 3m21s/3m23s/3m21s\\\hline % OK
   \end{tabular}
   \caption{Experiments with the execution of the testcases shipped with the
     source code of Hotmoka, by using varying implementations and configurations for the
@@ -92,6 +94,8 @@ and testcases are programmed against that interface.
     Stubbed peers do not create a real blockchain and do not form a network,
     but just consume ABI requests; therefore, for them,
     \textbf{\#peers} can only be $1$ and \textbf{rate} has no meaning.
+    Rows where the implementation is marked with an asterisk are experiments
+    performed on the subset of the time-independent tests only.
   }
   \label{tab:experiments}
   \end{center}
@@ -152,6 +156,20 @@ which never occurs because some transaction fails.
 As a consequence, such a testcase hangs for some time, until it gets terminated by a timeout.
 In this case, the testcase runs longer.
 
+In order to compare the timings of Tendermint and Mokamint, it must be clarified that
+some testcases depend on transactions being processed by an exact time window (for instance,
+auctions such as \texttt{BlindAuction}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/BlindAuction.java}}
+and polls such as \texttt{PollWithTimeWindow}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/PollWithTimeWindow.java}}),
+which is problematic for blockchains such as those based on Mokamint, whose
+proof-of-space consensus creates blocks at an average rate but where each single block
+may have a specific creation time that deviates significantly from the average rate.
+Consequently, such testcases are programmed to greatly increase the time window if run on Mokamint,
+in order to maximize the probability that transactions have been already committed by the time window.
+As a consequence, timings with different blockchain implementations cannot be compared for such tests.
+The two rows in \cref{tab:experiments}, whose implementation is marked with an asterisk, run
+only the subset of testcases that do not depend on a time window and consequently provide a more
+reliable comparison of the timings with different tools.
+
 Finally, the last two rows of \cref{tab:experiments} show experiments with a stubbed
 peer, first local then remote. Stubbed peers do not keep any blockchain, therefore
 there is no block creation rate for them. All tests succeed. The important aspect here is
@@ -164,12 +182,10 @@ configurations in \cref{tab:experiments}. This is a significant engineering simp
 and follows from the use of the same ABI for all configurations of the peer.
 Therefore, \cref{tab:experiments} shows that the same ABI can actually be used to run all tests
 against different configurations and implementations of the blockchain. Still, there are threats to validity
-that must be reported. First of all, some testcases depend on exact timings, such as
-\texttt{BlindAuction}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/BlindAuction.java}}. Such testcases are programmed to adapt their timings to the block creation rate
-of the blockchain, but this means that they do not execute identically on different configurations.
-It is possible to disable them with an environment variable, but they have been all included
-in the experiments reported in \cref{tab:experiments}. Another threat is related to the use of a stubbed
+that must be reported. First of all, timings for testcases that use a time window are difficult to compare between
+implementations that create blocks at a \emph{fixed} or rather at an \emph{average} rate.
+Another threat is related to the use of a stubbed
 implementation, such as in the last two lines of \cref{tab:experiments}. That implementation lacks the
 consensus and networking layers of a real blockchain, hence it is not covering the same amount of code
 as a fully-fledged blockchain implementation. Finally, testcases ignore gas fees, differently from
-the execution of the same transactions against a real blockchain.
+what happens when run on a real blockchain.
