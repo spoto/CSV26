@@ -5,18 +5,18 @@ smart contracts. Java was not devised for writing smart contracts, therefore
 Takamaka adds specific features that are needed for such contracts but are not
 available, normally, in Java: the ability to identify the caller of a method
 or constructor (as \texttt{caller()}) and to limit such caller to specific classes
-(through the annotation \texttt{@FromContract(class)}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/main/io-takamaka-code/src/main/java/io/takamaka/code/lang/FromContract.java}})
+(through the annotation \texttt{@FromContract(class)}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/main/io-takamaka-code/src/v1.8.1/java/io/takamaka/code/lang/FromContract.java}})
 and the ability to transfer
-cryptocurrency at a method or constructor call (through the \texttt{@Payable}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/main/io-takamaka-code/src/main/java/io/takamaka/code/lang/Payable.java}}
+cryptocurrency at a method or constructor call (through the \texttt{@Payable}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/v1.8.1/io-takamaka-code/src/main/java/io/takamaka/code/lang/Payable.java}}
 annotation). Moreover, the runtime of Takamaka takes care, automatically, of
 the serialization and deserialization of objects into the state database
 (\cref{fig:architecture}), which requires that the state of the smart contracts
 uses only fields of \emph{storage} types: either primitive or extending
-the library class \texttt{io.takamaka.code.lang.Storage}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/main/io-takamaka-code/src/main/java/io/takamaka/code/lang/Storage.java}},
+the library class \texttt{io.takamaka.code.lang.Storage}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/v1.8.1/io-takamaka-code/src/main/java/io/takamaka/code/lang/Storage.java}},
 that provides the machinery
 for serialization and deserialization. This means, for instance, that Java's collection
 classes cannot be used in the state of the contracts, but must be replaced by
-Takamaka's own storage versions there, such as \texttt{StorageList}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/main/io-takamaka-code/src/main/java/io/takamaka/code/util/StorageList.java}} for lists.
+Takamaka's own storage versions there, such as \texttt{StorageList}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/v1.8.1/io-takamaka-code/src/main/java/io/takamaka/code/util/StorageList.java}} for lists.
 The runtime of Takamaka also automatically charges and limits the execution
 of Takamaka code through the consumption of gas, exactly as in Solidity.
 All these features are weaved in the code through a mixture of code instrumentation
@@ -49,7 +49,7 @@ public class Ponzi extends Contract {
   \label{fig:ponzi}
 \end{figure*}
 
-Consider the Takamaka smart contract in \cref{fig:ponzi},
+Consider the Takamaka smart contract\footnote{Available at \url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-examples/src/main/java/io/hotmoka/examples/ponzi/Ponzi.java}} in \cref{fig:ponzi},
 translated from an equivalent Solidity smart contract
 by~\cite{IyerD18}. It implements a Ponzi scheme
 that investors can join either by installing an instance of
@@ -62,8 +62,8 @@ As long as new investors keep joining, previous investors keep earning split fee
 The last investor will, instead, lose its fee.
 
 Both the constructor of \texttt{Ponzi} and method \texttt{invest} in \cref{fig:ponzi}
-are limited to be called from a class that must extend \texttt{PayableContract}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/main/io-takamaka-code/src/main/java/io/takamaka/code/lang/PayableContract.java}}, the
-Takamaka library class that implements subclasses of \texttt{Contract}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/main/io-takamaka-code/src/main/java/io/takamaka/code/lang/Contract.java}}
+are limited to be called from a class that must extend \texttt{PayableContract}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/v1.8.1/io-takamaka-code/src/main/java/io/takamaka/code/lang/PayableContract.java}}, the
+Takamaka library class that implements subclasses of \texttt{Contract}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/v1.8.1/io-takamaka-code/src/main/java/io/takamaka/code/lang/Contract.java}}
 able to receive a payment through the
 \texttt{receive} method. This is important since investors are kept in a list in the
 persisted state of the object (\cref{line:investors}) and must be able to receive
@@ -138,7 +138,7 @@ class PonziTests extends HotmokaTest {
 \label{fig:testcases}  
 \end{figure*}
 
-\Cref{fig:testcases} shows a JUnit class with two testcases for the smart contract
+\Cref{fig:testcases} shows a JUnit class\footnote{Available at \url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/Ponzi.java}} with two testcases for the smart contract
 in \cref{fig:ponzi}. This class is a client of the Hotmoka blockchain, that uses its
 ABI (\cref{fig:architecture})
 to install the smart contract in \cref{fig:ponzi} and to call its constructor and method.

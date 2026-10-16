@@ -12,7 +12,7 @@ for the development of the Hotmoka application itself.
 Such testcases can be found inside the \texttt{io-hotmoka-tests} module
 of Hotmoka~\citep{hotmokacode}. The interested reader can reproduce
 the experiments in this section by following the instructions at
-\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/README.md}.
+\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/README.md}.
 The Git tag of the repository used for the experiments is \texttt{v1.12.5}.
 
 We have run the testcases on an Intel Core i3-10110U\ $\times$\ 4
@@ -66,14 +66,15 @@ and testcases are programmed against that interface.
     \hline
     \textbf{implementation} & \textbf{locality} & \textbf{\#peers} & \textbf{rate} & \textbf{successes} & \textbf{failures} & \textbf{time}\\\hline\hline
     Tendermint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h03m55s\\\hline
-    Tendermint$^*$ & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h03m55s\\\hline
+    Tendermint$^*$ & local & 1 & 4000 & 414/414/414 & 0/0/0 & 2h50m11s/2h51m25s/2h49m59s\\\hline % OK
     Tendermint & local & 4 & 3000 & 422/422/422 & 0/0/0 & 2h35m11s\\\hline
     Tendermint & remote & 4 & 3000 & 422/422/422 & 0/0/0 & 2h49m07s\\\hline
     Mokamint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h05m01s/3h07m22s/3h05m06s\\\hline % OK
-    Mokamint$^*$ & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h05m01s/3h07m22s/3h05m06s\\\hline
+    Mokamint$^*$ & local & 1 & 4000 & 414/414/414 & 0/0/0 & 3h05m01s/3h07m22s/3h05m06s\\\hline
     Mokamint & local & 4 & 3000 & 355/309/369 & \textbf{67}/\textbf{113}/\textbf{53} & 3h16m06s/2h11m06s/3h22m05s\\\hline % OK
     Mokamint & remote & 1 & 3000 & 422/422/422 & 0/0/0 & 3h20m09s/3h17m15s/3h18m03s\\\hline % OK
     stubbed & local & 1 & - & 422/422/422 & 0/0/0 & 2m42s/2m40s/2m39s\\\hline % OK
+    stubbed$^*$ & local & 1 & - & 414/414/414 & 0/0/0 & 1m26s/1m26s/1m27s\\\hline % OK
     stubbed & remote & 1 & - & 422/422/422 & 0/0/0 & 3m21s/3m23s/3m21s\\\hline % OK
   \end{tabular}
   \caption{Experiments with the execution of the testcases shipped with the
@@ -135,7 +136,7 @@ request over that contract gets undone by a history change.
 There is no special kind of testcases that fails. Instead, a testcase
 is more likely to fail if it performs more transactions and therefore the probability
 that at least one of them fails increases proportionally.
-Another example of failure occurred in the \texttt{Bombing}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/Bombing.java}} testcase.
+Another example of failure occurred in the \texttt{Bombing}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/Bombing.java}} testcase.
 That testcase creates $500$ accounts, each funded with $500000$ coins. Therefore, the total funds in the
 accounts is $500\cdot 500000$, that is, $250000000$. The testcase then executes
 $1000$ random transfers between random accounts, with zero fees. At the end, it sums
@@ -156,36 +157,79 @@ which never occurs because some transaction fails.
 As a consequence, such a testcase hangs for some time, until it gets terminated by a timeout.
 In this case, the testcase runs longer.
 
-In order to compare the timings of Tendermint and Mokamint, it must be clarified that
-some testcases depend on transactions being processed by an exact time window (for instance,
-auctions such as \texttt{BlindAuction}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/BlindAuction.java}}
-and polls such as \texttt{PollWithTimeWindow}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/master/io-hotmoka-tests/src/test/java/io/hotmoka/tests/PollWithTimeWindow.java}}),
-which is problematic for blockchains such as those based on Mokamint, whose
-proof-of-space consensus creates blocks at an average rate but where each single block
-may have a specific creation time that deviates significantly from the average rate.
-Consequently, such testcases are programmed to greatly increase the time window if run on Mokamint,
-in order to maximize the probability that transactions have been already committed by the time window.
-As a consequence, timings with different blockchain implementations cannot be compared for such tests.
-The two rows in \cref{tab:experiments}, whose implementation is marked with an asterisk, run
-only the subset of testcases that do not depend on a time window and consequently provide a more
-reliable comparison of the timings with different tools.
-
-Finally, the last two rows of \cref{tab:experiments} show experiments with a stubbed
+Finally, the last rows of \cref{tab:experiments} show experiments with a stubbed
 peer, first local then remote. Stubbed peers do not keep any blockchain, therefore
 there is no block creation rate for them. All tests succeed. The important aspect here is
 that the execution time this time is very small, just a few minutes, which makes
 these configurations adequate for continuous integration. In particular, the last configuration
 is that used in the Github action triggered at every commit on the Hotmoka repository.
 
-It is important to recall that the same testcases, unchanged, are used for all
+In order to compare the timings for different peer implementations, it must be clarified that
+some testcases depend on transactions being processed by an exact time window (for instance,
+auctions such as \texttt{BlindAuction}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/BlindAuction.java}}
+and polls such as \texttt{PollWithTimeWindow}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/PollWithTimeWindow.java}}).
+That time window must be linked to the block creation rate or otherwise those testcases would fail,
+Moreover, blockchains such as those based on Mokamint, whose
+proof-of-space consensus creates blocks at an \emph{average} rate but where each single block
+may have a specific creation time that deviates significantly from the average rate,
+introduce another risk of failure for such testcases.
+Consequently, such testcases are programmed to greatly increase the time window if run on Mokamint,
+in order to maximize the probability that transactions have been already committed by the end of the time window.
+As a consequence, timings with different blockchain implementations cannot be compared for such testcases.
+The rows in \cref{tab:experiments}, whose implementation is marked with an asterisk, run
+only the subset of the $414$ testcases that do not depend on a time window and consequently provide a more
+reliable comparison of the timings with different tools.
+
+Beyond the above consideration about testcases with time-windows,
+the same testcases, unchanged, are used for all
 configurations in \cref{tab:experiments}. This is a significant engineering simplification
 and follows from the use of the same ABI for all configurations of the peer.
 Therefore, \cref{tab:experiments} shows that the same ABI can actually be used to run all tests
 against different configurations and implementations of the blockchain. Still, there are threats to validity
-that must be reported. First of all, timings for testcases that use a time window are difficult to compare between
-implementations that create blocks at a \emph{fixed} or rather at an \emph{average} rate.
-Another threat is related to the use of a stubbed
-implementation, such as in the last two lines of \cref{tab:experiments}. That implementation lacks the
-consensus and networking layers of a real blockchain, hence it is not covering the same amount of code
-as a fully-fledged blockchain implementation. Finally, testcases ignore gas fees, differently from
-what happens when run on a real blockchain.
+that must be reported. First of all, timings for testcases that use a time window are difficult to compare,
+as already discussed.
+Moreover, testcases ignore gas fees, differently from what happens when run on a real blockchain.
+The use of a stubbed
+implementation, such as in the last three lines of \cref{tab:experiments}, is not
+a real blockchain, hence the execution of the testcases does not cover the same amount of code
+as with a fully-fledged blockchain implementation.
+
+An important question is wether the testcases cover enough code also with a stubbed implementation.
+Otherwise, testing against a stubbed implementation would not be significant for identifying bugs
+during continous integration.
+\Cref{fig:coverage_stubbed} shows that the execution of the testcases with the stubbed
+implementation covers around $65\%$ of Hotmoka. As expected, the modules that integrate Hotmoka with
+Tendermint and Mokamint are almost not covered at all.
+Moreover, we have used the testcases during the development of the Mokamint tool, to confirm that
+it was behaving correctly \emph{w.r.t\ } our previous implementation of Hotmoka
+based on Tendermint. In this sense, we have
+used the testcases for the test-driven development of Mokamint:
+all tests were failing at the beginning of the development of
+Mokamint, until more and more of them, and finally all of them,
+passed after each development iteration. This has been possible
+because the testcases cover a good amount of code, as shown in \cref{fig:coverage_tendermint} for
+their execution with Tendermint and in \cref{fig:coverage_mokamint} for their execution with Mokamint.
+
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{pictures/coverage_stubbed}
+  \end{center}
+  \caption{The code coverage for the execution of the testcases with the stubbed implementation.}
+  \label{fig:coverage_stubbed}
+\end{figure*}
+
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{pictures/coverage_tendermint}
+  \end{center}
+  \caption{The code coverage for the execution of the testcases with the Tendermint-based implementation.}
+  \label{fig:coverage_tendermint}
+\end{figure*}
+
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{pictures/coverage_mokamint}
+  \end{center}
+  \caption{The code coverage for the execution of the testcases with the Mokamint-based implementation.}
+  \label{fig:coverage_mokamint}
+\end{figure*}
