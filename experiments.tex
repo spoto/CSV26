@@ -191,12 +191,13 @@ as already discussed.
 Moreover, testcases ignore gas fees, differently from what happens when run on a real blockchain.
 The use of a stubbed
 implementation, such as in the last three lines of \cref{tab:experiments}, is not
-a real blockchain, hence the execution of the testcases does not cover the same amount of code
-as with a fully-fledged blockchain implementation.
+a real blockchain, hence the execution of the testcases executes a subset of
+the code of a fully-fledged blockchain implementation.
 
-An important question is wether the testcases cover enough code also with a stubbed implementation.
+In terms of coverage, an important question is exactly whether
+the testcases cover enough code also with a stubbed implementation.
 Otherwise, testing against a stubbed implementation would not be significant for identifying bugs
-during continous integration.
+during continuous integration.
 \Cref{fig:coverage_stubbed} shows that the execution of the testcases with the stubbed
 implementation covers around $65\%$ of Hotmoka. As expected, the modules that integrate Hotmoka with
 Tendermint and Mokamint are almost not covered at all.
