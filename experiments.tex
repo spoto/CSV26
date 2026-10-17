@@ -10,10 +10,27 @@ verify the correctness of Takamaka smart contracts, including some from the stan
 library shipped with Takamaka itself, and to provide a non-regression check
 for the development of the Hotmoka application itself.
 Such testcases can be found inside the \texttt{io-hotmoka-tests} module
-of Hotmoka~\citep{hotmokacode}. The interested reader can reproduce
-the experiments in this section by following the instructions at
-\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/README.md}.
-The Git tag of the repository used for the experiments is \texttt{v1.12.5}.
+of Hotmoka~\citep{hotmokacode}.
+Of these $422$ testcases, we have discarded $8$ for our experiments,
+since they are time-dependent, that is, they
+depend on transactions being processed by an exact time window (for instance,
+auctions such as \texttt{BlindAuction}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/BlindAuction.java}}
+and polls such as \texttt{PollWithTimeWindow}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/PollWithTimeWindow.java}}).
+That time window must be linked to the block creation rate or otherwise those testcases would fail.
+Moreover, blockchains such as those based on Mokamint, whose
+proof-of-space consensus creates blocks at an \emph{average} rate but where each single block
+may have a specific creation time that deviates significantly from the average rate,
+introduce another risk of failure for such testcases.
+Consequently, such testcases are programmed to greatly increase the time window if run on Mokamint,
+in order to maximize the probability that transactions have been already committed by the end of the time window.
+As a consequence, timings with different blockchain implementations cannot be compared for such testcases and
+we have discarded them here.
+
+The interested reader can reproduce
+the experiments in this section\footnote{See the instructions at
+\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/README.md},
+discarding time-dependent testcases as described in that page.},
+selecting the Git tag of the repository used for the experiments (\texttt{v1.12.5}).
 
 We have run the testcases on an Intel Core i3-10110U\ $\times$\ 4
 Linux Ubuntu 26.04 machine
@@ -65,17 +82,14 @@ and testcases are programmed against that interface.
   \begin{tabular}{|c|c|c|c||c|c|c|}
     \hline
     \textbf{implementation} & \textbf{locality} & \textbf{\#peers} & \textbf{rate} & \textbf{successes} & \textbf{failures} & \textbf{time}\\\hline\hline
-    Tendermint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h03m55s/3h07m01s/3h07m20s\\\hline % OK
-    Tendermint$^*$ & local & 1 & 4000 & 414/414/414 & 0/0/0 & 2h50m11s/2h51m25s/2h49m59s\\\hline % OK
-    Tendermint & local & 4 & 3000 & 422/422/422 & 0/0/0 & 2h35m11s\\\hline
-    Tendermint & remote & 4 & 3000 & 422/422/422 & 0/0/0 & 2h49m07s\\\hline
-    Mokamint & local & 1 & 4000 & 422/422/422 & 0/0/0 & 3h05m01s/3h07m22s/3h05m06s\\\hline % OK
-    Mokamint$^*$ & local & 1 & 4000 & 414/414/414 & 0/0/0 & 3h07m10s/3h06m12s/3h05m55s\\\hline % OK
-    Mokamint & local & 4 & 3000 & 355/309/369 & \textbf{67}/\textbf{113}/\textbf{53} & 3h16m06s/2h11m06s/3h22m05s\\\hline % OK
-    Mokamint & remote & 1 & 3000 & 422/422/422 & 0/0/0 & 3h20m09s/3h17m15s/3h18m03s\\\hline % OK
-    stubbed & local & 1 & - & 422/422/422 & 0/0/0 & 2m42s/2m40s/2m39s\\\hline % OK
-    stubbed$^*$ & local & 1 & - & 414/414/414 & 0/0/0 & 1m26s/1m26s/1m27s\\\hline % OK
-    stubbed & remote & 1 & - & 422/422/422 & 0/0/0 & 3m21s/3m23s/3m21s\\\hline % OK
+    Tendermint & local & 1 & 4000 & 414/414/414 & 0/0/0 & 3h03m55s/3h07m01s/3h07m20s\\\hline % OK
+    Tendermint & local & 4 & 3000 & 414/414/414 & 0/0/0 & 2h35m11s/2h35m50s/2h36m11s\\\hline % OK
+    Tendermint & remote & 4 & 3000 & 414/414/414 & 0/0/0 & 2h49m07s/2h50m31s/2h47m02s\\\hline % OK
+    Mokamint & local & 1 & 4000 & 414/414/414 & 0/0/0 & 3h05m01s/3h07m22s/3h05m06s\\\hline % OK
+    Mokamint & local & 4 & 3000 & 347/301/361 & \textbf{67}/\textbf{113}/\textbf{53} & 3h16m06s/2h11m06s/3h22m05s\\\hline % OK
+    Mokamint & remote & 1 & 3000 & 414/414/414 & 0/0/0 & 2h45m09s/2h47m15s/2h48m03s\\\hline % OK
+    stubbed & local & 1 & - & 414/414/414 & 0/0/0 & 2m42s/2m39s/2m39s\\\hline % OK
+    stubbed & remote & 1 & - & 414/414/414 & 0/0/0 & 3m21s/3m20s/3m19s\\\hline % OK
   \end{tabular}
   \caption{Experiments with the execution of the testcases shipped with the
     source code of Hotmoka, by using varying implementations and configurations for the
@@ -95,8 +109,6 @@ and testcases are programmed against that interface.
     Stubbed peers do not create a real blockchain and do not form a network,
     but just consume ABI requests; therefore, for them,
     \textbf{\#peers} can only be $1$ and \textbf{rate} has no meaning.
-    Rows where the implementation is marked with an asterisk are experiments
-    performed on the subset of the time-independent tests only.
   }
   \label{tab:experiments}
   \end{center}
@@ -122,8 +134,8 @@ The subsequent three rows in \cref{tab:experiments} run the testcases
 against peers implemented over the Mokamint proof of space consensus engine.
 The blockchain is first made of a single peer creating a block every $4000$
 milliseconds, on average. Then it is made of four peers,
-creating a block every $3000$ milliseconds. Finally, it is made of a single remote peer,
-creating a block every $3000$ milliseconds and contacted through a network. The
+creating a block every $3000$ milliseconds on average. Finally, it is made of a single remote peer,
+creating a block every $3000$ milliseconds on average and contacted through a network. The
 interesting point, here, is that a Mokamint blockchain of more than one peer makes
 some testcases fail (from $53$ to $113$ in our executions). This is because Mokamint has probabilistic
 finality, like Bitcoin and like the first Ethereum, therefore the history of the
@@ -133,7 +145,7 @@ the testcase fail. In our experiments,
 almost all failures are due to an incorrect nonce in the transaction requests,
 that do not match the current nonce in the target contract. This happens if the last transaction
 request over that contract gets undone by a history change.
-There is no special kind of testcases that fails. Instead, a testcase
+In particular, there is no special kind of testcases that fails. Instead, a testcase
 is more likely to fail if it performs more transactions and therefore the probability
 that at least one of them fails increases proportionally.
 Another example of failure occurred in the \texttt{Bombing}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/Bombing.java}} testcase.
@@ -164,24 +176,7 @@ that the execution time this time is very small, just a few minutes, which makes
 these configurations adequate for continuous integration. In particular, the last configuration
 is that used in the Github action triggered at every commit on the Hotmoka repository.
 
-In order to compare the timings for different peer implementations, it must be clarified that
-some testcases depend on transactions being processed by an exact time window (for instance,
-auctions such as \texttt{BlindAuction}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/BlindAuction.java}}
-and polls such as \texttt{PollWithTimeWindow}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/PollWithTimeWindow.java}}).
-That time window must be linked to the block creation rate or otherwise those testcases would fail,
-Moreover, blockchains such as those based on Mokamint, whose
-proof-of-space consensus creates blocks at an \emph{average} rate but where each single block
-may have a specific creation time that deviates significantly from the average rate,
-introduce another risk of failure for such testcases.
-Consequently, such testcases are programmed to greatly increase the time window if run on Mokamint,
-in order to maximize the probability that transactions have been already committed by the end of the time window.
-As a consequence, timings with different blockchain implementations cannot be compared for such testcases.
-The rows in \cref{tab:experiments}, whose implementation is marked with an asterisk, run
-only the subset of the $414$ testcases that do not depend on a time window and consequently provide a more
-reliable comparison of the timings with different tools.
-
-Beyond the above consideration about testcases with time-windows,
-the same testcases, unchanged, are used for all
+The same testcases, unchanged, are used for all
 configurations in \cref{tab:experiments}. This is a significant engineering simplification
 and follows from the use of the same ABI for all configurations of the peer.
 Therefore, \cref{tab:experiments} shows that the same ABI can actually be used to run all tests
