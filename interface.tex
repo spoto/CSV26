@@ -67,7 +67,7 @@ For instance, \texttt{runMethod} is used in the implementation of \texttt{getBal
 (not shown), to call the side-effect-free \texttt{balance} method of a contract.
 
 The ABI in \cref{fig:api} has been explicitly simplified. The interested reader will find
-the actual, complete ABI as interface \texttt{io.hotmoka.node.api.Node}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-node-api/src/main/java/io/hotmoka/node/api/Node.java}} in~\cite{hotmokacode}.
+the actual, complete ABI as the interface \texttt{Node}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-node-api/src/main/java/io/hotmoka/node/api/Node.java}} in~\cite{hotmokacode}.
 The latter has additional methods for calling Java static methods (that do not have a \texttt{receiver}),
 for accessing the current state of an object, its index (history),
 the manifest and the configuration of the blockchain and the set of responses/requests executed so far.

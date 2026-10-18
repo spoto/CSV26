@@ -12,7 +12,7 @@ annotation). Moreover, the runtime of Takamaka takes care, automatically, of
 the serialization and deserialization of objects into the state database
 (\cref{fig:architecture}), which requires that the state of the smart contracts
 uses only fields of \emph{storage} types: either primitive or extending
-the library class \texttt{io.takamaka.code.lang.Storage}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/v1.8.1/io-takamaka-code/src/main/java/io/takamaka/code/lang/Storage.java}},
+the library class \texttt{Storage}\footnote{\url{https://github.com/Hotmoka/io-takamaka-code/blob/v1.8.1/io-takamaka-code/src/main/java/io/takamaka/code/lang/Storage.java}},
 that provides the machinery
 for serialization and deserialization. This means, for instance, that Java's collection
 classes cannot be used in the state of the contracts, but must be replaced by
@@ -78,7 +78,7 @@ variables must be persistent in Takamaka, and this is statically verified
 when the jar of a smart contract is installed in blockchain,
 or otherwise the jar gets rejected.
 Finally, note that method \texttt{receive} of
-\texttt{PayableContract} is final in Takamaka (\ie it cannot be redefined),
+\texttt{PayableContract} is final in Takamaka (\ieinitial it cannot be redefined),
 which makes reentrancy impossible at \cref{line:receive} and avoids the complex use of
 Solidity's withdrawing pattern~\citep{AntonopoulosWPMP25}, which is needed instead
 in the Solidity code in~\cite{IyerD18}.
@@ -151,7 +151,8 @@ A mainnet, of course, has no faucet account. An abstract reference to the instal
 jar is later accessible as \texttt{jar}. Method \texttt{beforeEach}, instead, is
 run before \emph{each} of the testcases. It calls the inherited method \texttt{setAccounts}
 that executes transactions to create and fund three account objects, controlled by three fresh key pairs.
-That macro pays such transactions and funds from the faucet of the blockchain.
+That macro pays such transactions and funds them
+from the faucet of the blockchain.
 An abstract reference to such objects is later accessible by method \texttt{account} and their fresh
 private keys through method \texttt{privateKey}. One will need such keys in order to sign transaction
 requests to execute the constructor and method in \cref{fig:ponzi}.

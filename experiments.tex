@@ -11,7 +11,7 @@ library shipped with Takamaka itself, and to provide a non-regression check
 for the development of the Hotmoka application itself.
 Such testcases can be found inside the \texttt{io-hotmoka-tests} module
 of Hotmoka~\citep{hotmokacode}.
-Of these $422$ testcases, we have discarded $8$ for our experiments,
+Of these $422$ testcases, we have discarded eight in our experiments,
 since they are time-dependent, that is, they
 depend on transactions being processed by an exact time window (for instance,
 auctions such as \texttt{BlindAuction}\footnote{\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/src/test/java/io/hotmoka/tests/BlindAuction.java}}
@@ -26,12 +26,6 @@ in order to maximize the probability that transactions have been already committ
 As a consequence, timings with different blockchain implementations cannot be compared for such testcases and
 we have discarded them here.
 
-The interested reader can reproduce
-the experiments in this section\footnote{See the instructions at
-\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/README.md},
-discarding time-dependent testcases as described in that page.},
-selecting the Git tag of the repository used for the experiments (\texttt{v1.12.5}).
-
 We have run the testcases on an Intel Core i3-10110U\ $\times$\ 4
 Linux Ubuntu 26.04 machine
 with $16$ gigabytes of RAM, both for local and remote peers,
@@ -40,6 +34,12 @@ Note, however, that the specific configuration of the testing machine
 is largely irrelevant, since these tests use almost no RAM and their speed depends on the
 block creation rate of the blockchain, not on the speed of the processor or Java interpreter,
 except for the experiments with the stubbed peers.
+The interested reader can reproduce
+the experiments in this section\footnote{See the instructions at
+\url{https://github.com/Hotmoka/hotmoka/blob/v1.12.5/io-hotmoka-tests/README.md},
+discarding time-dependent testcases as described in that page.},
+selecting the Git tag of the Hotmoka
+repository used for the experiments (\texttt{v1.12.5}).
 
 \begin{figure*}
   \begin{lstlisting}[language=Java,numbers=left]
@@ -70,11 +70,11 @@ variables to the tests: if $n\ge 1$ peers are required, then those methods retur
 the first of a network of a fully connected network of $n$ peers.
 Method \texttt{mkStubbedNode} creates, instead, a single stubbed node, and
 is used as default. In all three cases,
-the peer is presented through its \texttt{io.hotmoka.node.api.Node} interface.
+the peer is exposed through its \texttt{Node} interface.
 Furthermore, if a remote node is required,
 the \texttt{mkRemoteNode} method adapts that interface first to a service and then to a remote
 to such a service (\cref{fig:remote_peer}). In all cases,
-the same \texttt{io.hotmoka.node.api.Node} interface is available to interact with the blockchain peer
+the same \texttt{Node} interface is available to interact with the blockchain peer
 and testcases are programmed against that interface.
 
 \begin{table*}
@@ -108,7 +108,7 @@ and testcases are programmed against that interface.
     is the total time for the execution of all the testcases.
     Stubbed peers do not create a real blockchain and do not form a network,
     but just consume ABI requests; therefore, for them,
-    \textbf{\#peers} can only be $1$ and \textbf{rate} has no meaning.
+    \textbf{\#peers} can only be one and \textbf{rate} has no meaning.
   }
   \label{tab:experiments}
   \end{center}
@@ -184,8 +184,8 @@ against different configurations and implementations of the blockchain. Still, t
 that must be reported. First of all, timings for testcases that use a time window are difficult to compare,
 as already discussed.
 Moreover, testcases ignore gas fees, differently from what happens when run on a real blockchain.
-The use of a stubbed
-implementation, such as in the last three lines of \cref{tab:experiments}, is not
+A stubbed
+implementation, such as in the last two rows of \cref{tab:experiments}, is not
 a real blockchain, hence the execution of the testcases executes a subset of
 the code of a fully-fledged blockchain implementation.
 
@@ -197,7 +197,7 @@ during continuous integration.
 implementation covers around $65\%$ of Hotmoka. As expected, the modules that integrate Hotmoka with
 Tendermint and Mokamint are almost not covered at all.
 Moreover, we have used the testcases during the development of the Mokamint tool, to confirm that
-it was behaving correctly \emph{w.r.t\ } our previous implementation of Hotmoka
+it was behaving correctly \wrt our previous implementation of Hotmoka
 based on Tendermint. In this sense, we have
 used the testcases for the test-driven development of Mokamint:
 all tests were failing at the beginning of the development of

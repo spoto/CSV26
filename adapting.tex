@@ -72,7 +72,7 @@ modify the testcases in \cref{fig:testcases}, in order to replace the direct met
 calls in \cref{fig:api} with network calls. It also requires to represent ABI arguments
 in JSON format and back. This modification is problematic since it is against
 the open-closed principle: our testcases should be open to extension
-(\ie able to run both on a local peer and on a remote peer reachable through a network)
+(\ieinitial able to run both on a local peer and on a remote peer reachable through a network)
 without requiring their
 code modification. Concretely, this solution requires one to maintain two versions of the testcases,
 one for testing against a local peer and another for testing against a remote peer

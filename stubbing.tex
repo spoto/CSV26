@@ -15,14 +15,14 @@ testnets. But this solution has a clear drawback: the execution time
 of the testcases becomes relatively long, since an actual testnet
 creates an actual blockchain and the block creation rate cannot be
 too small, or otherwise synchronization between the peers might be lost.
-With a block creation rate of $3$ seconds (already quite short) the
+With a block creation rate of three seconds (already quite short) the
 execution of the testcases in \cref{fig:testcases} requires around one minute,
 since the calls to \texttt{installJar}, \texttt{setAccounts},
 \texttt{callConstructor} and \texttt{callMethod} trigger a transaction request
 that must be included in the next block before the next call can be executed.
 The asynchronous versions of such calls would not help here: these testcases
 need to wait until requests get executed and transactions have modified
-the state, before checking assertions on the modified state or sending
+the state. Only after they can check assertions on the modified state or send
 a new request from the modified state.
 
 Slow testcases means that they cannot be used for continuous integration,

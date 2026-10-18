@@ -10,7 +10,7 @@ and actual data objects~\citep{AntonopoulosWPMP25}. Smart contracts
 deal with money, notarization and agreements. They are immutable after
 deployment. Therefore, their correctness is important and there exist
 many techniques to increase confidence on their correctness.
-The simpler and most traditional one is testing, which consists
+The simplest and most traditional one is testing, which consists
 in creating some executable usage scenarios for the smart contracts,
 as a sequence of transactions that start from an initial fixture.
 Testcases test the final state of the application to verify the correct
@@ -49,11 +49,11 @@ behavior of the smart contracts.
       \draw (-1,3.4) node[scale=0.7] {\db};
       \draw (-1,2.5) node {database of states};
 
-      \draw[->, thick] (3.5,1.0) -- (6,1.0);
-      \draw (4.75,1.2) node {{\small challenges}};
+      \draw[->, thick] (3.5,0.9) -- (6,0.9);
+      \draw (4.75,1.1) node {{\small challenges}};
 
-      \draw[<-, thick] (3.5,0.5) -- (6,0.5);
-      \draw (4.75,0.25) node {{\small answers}};
+      \draw[<-, thick] (3.5,0.6) -- (6,0.6);
+      \draw (4.75,0.35) node {{\small answers}};
 
       \draw[<-, thick] (1.2,1.5) -- (1.2,3);
       \draw[<-, thick] (1.8,3) -- (1.8,1.5);
@@ -73,7 +73,7 @@ behavior of the smart contracts.
 a typical blockchain peer. The peer deals with networking and consensus.
 It communicates with one or more miners, that help the peer create new blocks,
 eventually stored in its database of blocks. Miners receive a challenge to solve
-(for instance, the mimimization of the hash of a new block) and provide
+(for instance, the minimization of the hash of a new block) and provide
 their best solution for the challenge. Peers are connected to other peers
 and gossip new blocks and new transaction requests to them.
 Clients are software
@@ -85,10 +85,10 @@ But they can also be testcases, that execute testing scenarios on the peer,
 which is the perspective taken in this article.
 Finally, the application is a software component that specifies which
 transactions are valid and which is their semantics. For instance, the Bitcoin
-application has only transactions that transform input UTXOs into ouptut
+application has only transactions that transform input UTXOs into output
 UTXOs, while the Ethereum application has transactions that execute
 arbitrary EVM bytecode. Transaction requests are first parked inside a
-mempool \ie a queue from where they are eventually extracted for execution.
+mempool\ie a queue from where they are eventually extracted for execution.
 Clients may receive responses about the outcome of the
 transactions that they requested,
 in the form of actual results or events. There is an actual API
@@ -103,14 +103,14 @@ Two perspectives can be taken about what is being tested.
 The first one is that the target of the testing activity are
 peer, miners and application.
 In this cases, testcases can get used as non-regression tests
-for modifications to the blockchain peer, miners or application, even for
-a complete replacement of the peer implementation. This use of
-testcases has not been discussed erlier, in the context of blockchain
+for modifications to the blockchain peer, miners or application, even
+during a complete replacement of the peer implementation. This use of
+testcases has not been discussed earlier, in the context of blockchain
 technology, and is the main reason of this paper.
 A second perspective assumes instead that
 the blockchain peer, its miners and its application are working correctly
-and uses them as a testbench for the execution of the smart contracts, that
-are the target of the testing activity, in this case. This perspective
+and uses them as a testbench for the execution of the smart contracts, that,
+in this case, are the target of the testing activity. This perspective
 is more traditional, and there are already many frameworks for testing smart
 contracts (see \cref{sec:related}).
 
@@ -149,18 +149,18 @@ continuous integration as a Github action.
 The contributions of this article are the following:
 %
 \begin{itemize}
-\item the description of the ABI between the clients and an
-  Hotmoka blockchain peer, meant to allow the execution of object-oriented
+\item the description of the ABI between the clients and
+  a Hotmoka blockchain peer, meant to allow the execution of object-oriented
   code in blockchain;
 \item the description of how that single ABI allows one to
   run testcases of smart contracts
   against different implementations of the peer, even with different
-  consensus algorithms; therefore, testcsaes become
+  consensus algorithms; therefore, testcases become
   a non-regression check
   during the development of peer, miners and application;
 \item a stubbed implementation of the peers, that makes the execution of the
   testcases faster and allows their use for continuous integration, but still keeps
-  their same ABI;
+  the same ABI;
 \item an adaptor for remote peers, that allows one to execute testcases
   against a local peer as well as against a remote peer, always using the
   same ABI.
