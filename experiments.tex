@@ -66,7 +66,7 @@ Inside \texttt{HotmokaTest}, that variable is accessed and used to decide which
 peer(s) must be created. \Cref{fig:nodeType} shows how this is performed. Methods
 \texttt{mkTendermintNetwork} and \texttt{mkMokamintNetwork} create a blockchain whose peers
 use Tendermint or Mokamint, respectively. The number of peers is also provided as an environment
-variables to the tests: if $n\ge 1$ peers are required, then those methods return
+variable to the tests: if $n\ge 1$ peers are required, then those methods return
 the first of a network of a fully connected network of $n$ peers.
 Method \texttt{mkStubbedNode} creates, instead, a single stubbed node, and
 is used as default. In all three cases,
@@ -186,7 +186,7 @@ as already discussed.
 Moreover, testcases ignore gas fees, differently from what happens when run on a real blockchain.
 A stubbed
 implementation, such as in the last two rows of \cref{tab:experiments}, is not
-a real blockchain, hence the execution of the testcases executes a subset of
+a real blockchain, hence the execution of the testcases only covers a subset of
 the code of a fully-fledged blockchain implementation.
 
 In terms of coverage, an important question is exactly whether
